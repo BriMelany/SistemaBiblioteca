@@ -1,0 +1,217 @@
+<section class="page">
+  <h2>Encuentra tu Recurso</h2>
+
+  <!-- Buscador -->
+  <div class="searchbar">
+    <input type="text"
+           placeholder="Ingresa el título de Libro"
+           [(ngModel)]="q"
+           (input)="pageIndex=1">
+  </div>
+
+  <!-- Grid: resultados + filtros -->
+  <div class="catalogo-grid">
+
+    <!-- RESULTADOS -->
+    <div class="card results">
+      <div class="results__title">Resultados</div>
+
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Editorial</th>
+            <th>Año</th>
+            <th>Categoría</th>
+            <th class="center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of lista; track r.id) {
+            <tr>
+              <td>{{ r.tipo }}</td>
+              <td class="ellipsis">{{ r.titulo }}</td>
+              <td>{{ r.autor }}</td>
+              <td>{{ r.editorial }}</td>
+              <td class="center">{{ r.anio }}</td>
+              <td>{{ r.categoria }}</td>
+              <td class="center">
+                <button class="icon icon--view" title="Ver" (click)="verDetalle(r)">
+                  <span class="material-symbols-rounded">visibility</span>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="center muted">Sin resultados</td></tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Paginación -->
+      @if (filtrada.length > 0) {
+        <div class="pager">
+          <button class="pg-btn" (click)="prev()" [disabled]="pageIndex===1">
+            <span class="material-symbols-rounded">chevron_left</span>
+          </button>
+          @for (p of pages; track p) {
+            <button class="pg-btn" [class.is-active]="p===pageIndex" (click)="goToPage(p)">{{ p }}</button>
+          }
+          <button class="pg-btn" (click)="next()" [disabled]="pageIndex===totalPages">
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- FILTROS (sidebar derecha) -->
+        <aside class="card filtros">
+        <div class="filtros__title">Filtros</div>
+
+        <!-- Tipo -->
+        <section class="fx">
+            <header class="fx__hdr" (click)="openOnly('tipo')">
+            <span>Tipo</span>
+            <span class="material-symbols-rounded">{{ showTipo ? 'expand_more' : 'expand_less' }}</span>
+            </header>
+            @if (showTipo) {
+            <div class="fx__body">
+                @for (t of tipos; track t) {
+                <label class="chk">
+                    <input type="checkbox"
+                        #cb
+                        [checked]="tipoSel.has(t)"
+                        (change)="toggle(tipoSel, t, cb.checked)">
+                    <span>{{ t }}</span>
+                </label>
+                }
+            </div>
+            }
+        </section>
+
+        <!-- Editorial -->
+        <section class="fx">
+            <header class="fx__hdr" (click)="openOnly('edit')">
+            <span>Editorial</span>
+            <span class="material-symbols-rounded">{{ showEdit ? 'expand_more' : 'expand_less' }}</span>
+            </header>
+            @if (showEdit) {
+            <div class="fx__body">
+                @for (e of editoriales; track e) {
+                <label class="chk">
+                    <input type="checkbox"
+                        #cb
+                        [checked]="editorialSel.has(e)"
+                        (change)="toggle(editorialSel, e, cb.checked)">
+                    <span>{{ e }}</span>
+                </label>
+                }
+            </div>
+            }
+        </section>
+
+        <!-- Categoría -->
+        <section class="fx">
+            <header class="fx__hdr" (click)="openOnly('cat')">
+            <span>Categoría</span>
+            <span class="material-symbols-rounded">{{ showCat ? 'expand_more' : 'expand_less' }}</span>
+            </header>
+            @if (showCat) {
+            <div class="fx__body">
+                @for (c of categorias; track c) {
+                <label class="chk">
+                    <input type="checkbox"
+                        #cb
+                        [checked]="categoriaSel.has(c)"
+                        (change)="toggle(categoriaSel, c, cb.checked)">
+                    <span>{{ c }}</span>
+                </label>
+                }
+            </div>
+            }
+        </section>
+
+        <!-- Año -->
+        <section class="fx">
+            <header class="fx__hdr" (click)="openOnly('anio')">
+            <span>Año</span>
+            <span class="material-symbols-rounded">{{ showAnio ? 'expand_more' : 'expand_less' }}</span>
+            </header>
+            @if (showAnio) {
+            <div class="fx__body fx__row">
+                <label class="field small">
+                <span class="field__label">Mín</span>
+                <input class="field__input" type="number" [(ngModel)]="anioMin" (change)="pageIndex=1">
+                </label>
+                <label class="field small">
+                <span class="field__label">Máx</span>
+                <input class="field__input" type="number" [(ngModel)]="anioMax" (change)="pageIndex=1">
+                </label>
+            </div>
+            }
+        </section>
+
+        <div class="fx__footer">
+            <button class="btn-ghost" (click)="limpiarFiltros()">
+            <span class="material-symbols-rounded">close</span> Limpiar filtros
+            </button>
+        </div>
+        </aside>
+  </div>
+</section>
+
+<!-- MODAL DETALLE -->
+@if (seleccion) {
+  <div class="modal-backdrop" (click)="cerrarDetalle()"></div>
+
+  <div class="modal card modal--wide" (click)="$event.stopPropagation()">
+    <button class="modal__close" (click)="cerrarDetalle()" aria-label="Cerrar">
+      <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <!-- cinta verde/morada -->
+    <div class="detalle__hdr">
+      <span class="pill"
+            [class.pill--purple]="seleccion!.es_consulta_sala"
+            [class.pill--green]]="!seleccion!.es_consulta_sala">
+        {{ seleccion!.es_consulta_sala ? 'Consulta en sala' : 'Puede reservar' }}
+      </span>
+    </div>
+
+    <div class="detalle">
+        <div class="det__left">
+         <div class="thumb">
+          <img [src]="seleccion!.portadaUrl || 'assets/cover-placeholder.png'" loading="lazy">
+        </div>
+        </div>
+     
+      <div class="det__right">
+        <dl class="dl">
+          <div><dt>ISBN: </dt>           <dd>{{ seleccion!.isbn || '—' }}</dd></div>
+          <div><dt>Tipo Recurso: </dt>  <dd>{{ seleccion!.tipo }}</dd></div>
+          <div><dt>Título: </dt>         <dd>{{ seleccion!.titulo }}</dd></div>
+          <div><dt>Subtítulo: </dt>      <dd>{{ seleccion!.subtitulo || '……' }}</dd></div>
+          <div><dt>Autor: </dt>          <dd>{{ seleccion!.autor }}</dd></div>
+          <div><dt>Género: </dt>         <dd>{{ seleccion!.categoria }}</dd></div>
+          <div><dt>Editorial: </dt>      <dd>{{ seleccion!.editorial }}</dd></div>
+          <div><dt>Año: </dt>            <dd>{{ seleccion!.anio }}</dd></div>
+          <div><dt>Descripción: </dt>    <dd>{{ seleccion!.descripcion || '[Texto aquí]' }}</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    @if (seleccion!.es_consulta_sala) {
+      <div class="note note--warn">
+        <span class="material-symbols-rounded">info</span>
+        Este recurso no puede ser reservado, solo consultado en sala
+      </div>
+    } @else {
+      <div class="acciones">
+        <button class="btn-primary" (click)="solicitarReserva(seleccion!)">
+          Solicitar reserva
+        </button>
+      </div>
+    }
+  </div>
+}
