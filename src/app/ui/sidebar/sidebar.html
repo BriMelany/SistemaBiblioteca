@@ -1,0 +1,36 @@
+<aside class="sb">
+  <div class="sb__brand">Nombre de la biblioteca</div>
+  <hr class="sb__rule" />
+
+  <nav class="sb__nav">
+    <a class="sb__link" routerLink="/inicio" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+      <span class="sb__icon" aria-hidden="true"><span class="material-symbols-rounded">home</span></span>
+      <span class="sb__text">Inicio</span>
+    </a>
+
+    <a class="sb__link" routerLink="/catalogo" routerLinkActive="is-active">
+      <span class="sb__icon" aria-hidden="true"><span class="material-symbols-rounded">menu_book</span></span>
+      <span class="sb__text">Catálogo de Libros</span>
+    </a>
+
+    <a class="sb__link" routerLink="/prestamos" routerLinkActive="is-active">
+      <span class="sb__icon" aria-hidden="true"><span class="material-symbols-rounded">autorenew</span></span>
+      <span class="sb__text">Préstamo y devolución</span>
+    </a>
+
+    <a class="sb__link" routerLink="/reservas" routerLinkActive="is-active">
+      <span class="sb__icon" aria-hidden="true"><span class="material-symbols-rounded">event_available</span></span>
+      <span class="sb__text">Reservas</span>
+    </a>
+
+    <a class="sb__link" routerLink="/multas" routerLinkActive="is-active">
+      <span class="sb__icon" aria-hidden="true"><span class="material-symbols-rounded">receipt_long</span></span>
+      <span class="sb__text">Multas</span>
+    </a>
+  </nav>
+
+  <div class="sb__spacer"></div>
+  <a class="sb__exit" routerLink="/login">
+    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:18px;vertical-align:-2px">logout</span> Salir
+  </a>
+</aside>

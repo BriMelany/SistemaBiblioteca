@@ -1,0 +1,188 @@
+<section class="page">
+  <h2>Listado de reservas</h2>
+
+<div class="toolbar">
+  <div class="toolbar__row toolbar__row--top">
+    @if (rol === 'Usuario') {
+      <button class="btn-primary"
+              [routerLink]="'/catalogo'"
+              [queryParams]="{ from:'reservas', nueva:1 }">
+        <span class="material-symbols-rounded">add</span> Nueva Reserva
+      </button>
+    }
+  </div>
+  <div class="toolbar__row toolbar__row--filters">
+    <label class="search">
+      <input type="date" #f (change)="cambiarFecha(f.value)">
+      <span class="material-symbols-rounded">calendar_month</span>
+    </label>
+
+    <label class="estado">
+      <span>Estado:</span>
+      <select #s (change)="cambiarEstado(s.value)">
+        <option value="Activa">Activa</option>
+        <option value="Pendiente">Pendiente</option>
+        <option value="Vencida">Vencida</option>
+        <option value="Cancelada">Cancelada</option>
+        <option value="Todas">Todas</option>
+      </select>
+      <span class="material-symbols-rounded">expand_more</span>
+    </label>
+  </div>
+</div>
+  <!-- Mensajes -->
+  @if (cargando) {
+    <div class="loading">
+      <span class="material-symbols-rounded">hourglass_top</span> Cargando…
+    </div>
+  }
+  @if (error) {
+    <div class="alert error">{{ error }}</div>
+  }
+
+  <!-- Tabla -->
+  <div class="card table-wrap">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Fecha Reserva</th>
+          <th>Tipo de recurso</th>
+          <th>Título</th>
+           @if (rol !== 'Usuario') {
+            <th>Usuario</th>
+            <th>Notificación</th>
+            }
+          <th>Estado</th>
+           @if (rol === 'Usuario') {
+            <th>Detalle</th>   <!-- solo para Usuario -->
+            }
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of lista; track r.id) {
+            <tr>
+            <td>{{ r.codigo }}</td>
+            <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>{{ r.tipo }}</td>
+            <td class="ellipsis">{{ r.titulo }}</td>
+            
+            @if (rol !== 'Usuario') {
+                <td>{{ r.usuario || '—' }}</td>
+                <td>{{ r.notificacion || '—' }}</td>
+            }
+            <td>
+                <span class="badge"
+                    [class.is-activa]="r.estado==='Activa'"
+                    [class.is-pendiente]="r.estado==='Pendiente'"
+                    [class.is-cancelada]="r.estado==='Cancelada'"
+                    [class.is-vencida]="r.estado==='Vencida'">
+                {{ r.estado }}
+                </span>
+            </td>
+
+              @if (rol === 'Usuario') {
+                <td class="center">
+                <button class="icon icon--view" title="Ver detalle" (click)="verDetalle(r)">
+                    <span class="material-symbols-rounded">visibility</span>
+                </button>
+                </td>
+            }
+            <!-- Acciones según rol -->
+            <td class="center">
+                @if (rol === 'Usuario') {
+                <button class="icon icon--badge" title="Cancelar libro" (click)="pedirCancelar(r)">
+                    <span class="material-symbols-rounded base">menu_book</span>
+                    <span class="material-symbols-rounded badge">close</span>
+                </button>
+                <button class="icon icon--download" title="Descargar comprobante" (click)="descargar(r)">
+                    <span class="material-symbols-rounded">download</span>
+                </button>
+                } @else {
+                <!-- Solo para Admin/Bibliotecario (no se muestra 'cancelar') -->
+                <button class="icon icon--refresh" title="Actualizar estado" (click)="actualizar(r)">
+                    <span class="material-symbols-rounded">autorenew</span>
+                </button>
+                <button class="icon icon--download" title="Descargar comprobante" (click)="descargar(r)">
+                    <span class="material-symbols-rounded">download</span>
+                </button>
+                }
+            </td>
+            </tr>
+        } @empty {
+            <tr><td [attr.colspan]="rol === 'Usuario' ? 7 : 9" class="center muted">Sin resultados</td></tr>
+        }
+        </tbody>
+    </table>
+    @if (filtrada.length > 0) {
+  <div class="pager">
+   
+    <nav class="pager__nav">
+      <button class="pg-btn" (click)="prev()" [disabled]="pageIndex === 1">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+
+      @for (p of pages; track p) {
+        <button class="pg-btn" [class.is-active]="p === pageIndex" (click)="goToPage(p)">{{ p }}</button>
+      }
+
+      <button class="pg-btn" (click)="next()" [disabled]="pageIndex === totalPages">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </button>
+    </nav>
+  </div>
+}
+
+  </div>
+<!-- MODAL: Confirmar cancelación -->
+@if (mostrarConfirmar && seleccion) {
+  <div class="modal-backdrop" (click)="cerrarTodo()"></div>
+  <div class="modal card modal--danger" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal__head">Cancelar Reserva</div>
+    <div class="modal__body">
+      <p>Se cancelará la reserva de:</p>
+      <p class="danger"><b>Libro con</b> “{{ seleccion!.titulo }}”</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn-danger" (click)="cancelar()">Confirmar</button>
+      <button class="btn-ghost" (click)="cerrarTodo()">Regresar</button>
+    </div>
+  </div>
+}
+
+<!-- MODAL: Detalle -->
+@if (seleccion && !mostrarConfirmar) {
+  <div class="modal-backdrop" (click)="cerrarTodo()"></div>
+
+  <div class="modal card modal--compact" (click)="$event.stopPropagation()">
+    <button class="modal__close" (click)="cerrarTodo()" aria-label="Cerrar">
+      <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <div class="detalle det--compact">
+      <div class="det__left">
+         <div class="thumb">
+          <img [src]="seleccion!.portadaUrl || 'assets/cover-placeholder.png'" loading="lazy">
+        </div>
+        </div>
+
+      <div class="det__right">
+        <dl class="dl dl--tight">
+        <div><dt>Título:</dt>             <dd>{{ seleccion!.titulo }}</dd></div>
+        <div><dt>Tipo recurso:</dt>       <dd>{{ seleccion!.tipo }}</dd></div>
+        <div><dt>Código:</dt>             <dd>{{ seleccion!.codigo }}</dd></div>
+        <div><dt>Fecha reserva:</dt>      <dd>{{ seleccion!.fecha | date:'dd/MM/yyyy' }}</dd></div>
+        <div><dt>Fecha expiración:</dt>   <dd>{{ seleccion!.fechaExpiracion | date:'dd/MM/yyyy' }}</dd></div>
+        <div><dt>Notificado:</dt>         <dd>{{ seleccion!.notificado ? 'Sí' : 'No' }}</dd></div>
+        <div><dt>Fecha notificación:</dt> 
+            <dd>{{ (seleccion!.notificado && seleccion!.fechaNotificacion) 
+                    ? (seleccion!.fechaNotificacion | date:'dd/MM/yyyy') 
+                    : '—' }}</dd></div>
+      </dl>
+      </div>
+    </div>
+  </div>
+}
+</section>

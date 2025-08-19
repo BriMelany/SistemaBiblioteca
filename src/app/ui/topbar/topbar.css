@@ -1,0 +1,110 @@
+:host{
+  --purple:#6a55f7;
+  --chip-bg:#e6e9ff;
+  --alert-bg:#ccf7c8;
+  --alert-text:#1c7a1c;
+}
+
+/* helpers de iconos (Material Symbols Rounded) */
+.ms{
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal; font-style: normal;
+  display: inline-block; line-height: 1; white-space: nowrap;
+  font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+}
+.ms-18{ font-size:18px; }
+.ms-20{ font-size:20px; }
+.ms-24{ font-size:24px; }
+.ms-white{ color:#fff; }
+.ms-purple{ color: var(--purple); }
+.ms-chev{ color:#5e5adb; }
+
+/* contenedor */
+.tb{ display:flex; align-items:center; justify-content:right; gap:20px; padding:10px 20px; }
+.tb__group{ display:flex; align-items:center; gap:10px; }
+
+/* aviso verde */
+.tb__alert{
+  background: var(--alert-bg);
+  color: var(--alert-text);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 1px 0 rgba(0,0,0,.03) inset;
+}
+
+/* campana */
+.tb__bell{
+  position: relative;
+  display: inline-grid; place-items: center;
+  width: 44px; height: 44px;
+  border: 1px solid #ececff; background:#fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+  cursor: pointer; padding: 0;
+}
+
+/* badge notificaciones */
+.tb__badge{
+  position:absolute; top:-4px; right:-4px;
+  min-width:18px; height:18px; padding:0 4px;
+  display:grid; place-items:center;
+  background:#158003; color:#fff; font-size:12px; font-weight:700;
+  border:2px solid #fff; border-radius:999px;
+}
+
+/* chip de usuario */
+.tb__chip{
+  display:flex; align-items:center; gap:10px;
+  background: var(--chip-bg);
+  border-radius: 24px;
+  padding: 8px 14px 8px 8px;
+}
+.tb__avatar{
+  width:32px; height:32px; border-radius:50%;
+  background: var(--purple); display:grid; place-items:center;
+}
+.tb__name{ color:#4a4ee0; font-weight:600; }
+.tb__notif{ position: relative; display: inline-block; }
+.tb__bell-icon{ color:#6a55f7; font-size:24px; }
+
+/* === Popover alineado a la IZQUIERDA del botón === */
+.tb__popover{
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 10px);   /* 👈 a la izquierda del botón */
+  transform: translateY(-50%);
+  background: #ccf7c8;
+  color: #1c7a1c;
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.08);
+  white-space: nowrap;        /* una sola línea; quítalo si quieres multi-línea */
+  z-index: 10;
+}
+
+/* Flechita apuntando al botón, en el lado derecho del globo */
+.tb__popover::before{
+  content:"";
+  position:absolute;
+  top: 50%;
+  right: -6px;                /* 👈 pegada al botón */
+  width: 10px; height: 10px;
+  transform: translateY(-50%) rotate(45deg);
+  background:#ccf7c8;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.02);
+}
+
+/* (Opcional) Si el popover choca con el borde izquierdo, forzar a mostrarse debajo en pantallas muy estrechas */
+@media (max-width: 480px){
+  .tb__popover{
+    right: auto;
+    left: 0;
+    top: 110%;
+    transform: none;
+  }
+  .tb__popover::before{
+    right: auto; left: 14px; top: -6px;
+    transform: rotate(45deg);
+  }
+}
