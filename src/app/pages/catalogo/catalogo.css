@@ -165,12 +165,33 @@
 .note--warn{ background:#f9f9ff; }
 
 .acciones{
-  margin-top:14px; display:flex; justify-content:flex-end;
+  margin-top: 14px;
+  display: flex;
+  justify-content: center; 
+  gap: 6px;
 }
 .btn-primary{
   background:#5653f6; color:#fff; border:1px solid #5653f6;
   padding:10px 14px; border-radius:12px; cursor:pointer; font-size: 15px;font-weight:700;
 }
+
+.prestamo{
+  display: flex;flex-direction: row; justify-content: space-between; align-items: center;width: 100%;
+}
+
+.estado-prestamo{
+  color:#02A620; background:#bfffd3;
+  padding:10px 14px; border-radius:12px; cursor:pointer; font-size: 15px;font-weight:700;
+}
+
+.page_header{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 
 /* responsive */
 @media (max-width: 980px){

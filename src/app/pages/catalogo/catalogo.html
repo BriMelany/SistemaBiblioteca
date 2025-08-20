@@ -1,5 +1,15 @@
 <section class="page">
+  
+  <div class="page_header">
   <h2>Encuentra tu Recurso</h2>
+
+  @if (rol === "Bibliotecario" || rol === "Administrador") {
+    <button class="btn-primary"  (click)="accionButton()">
+      Nuevo Recurso
+    </button>
+  }
+</div>
+
 
   <!-- Buscador -->
   <div class="searchbar">
@@ -19,33 +29,50 @@
       <table class="tabla">
         <thead>
           <tr>
-            <th>Tipo</th>
-            <th>Título</th>
-            <th>Autor</th>
-            <th>Editorial</th>
-            <th>Año</th>
-            <th>Categoría</th>
-            <th class="center">Acciones</th>
+            @for (col of columns; track col) {
+                 <th>{{ headers[col] }}</th>
+            }
           </tr>
         </thead>
         <tbody>
-          @for (r of lista; track r.id) {
-            <tr>
-              <td>{{ r.tipo }}</td>
-              <td class="ellipsis">{{ r.titulo }}</td>
-              <td>{{ r.autor }}</td>
-              <td>{{ r.editorial }}</td>
-              <td class="center">{{ r.anio }}</td>
-              <td>{{ r.categoria }}</td>
-              <td class="center">
-                <button class="icon icon--view" title="Ver" (click)="verDetalle(r)">
-                  <span class="material-symbols-rounded">visibility</span>
-                </button>
-              </td>
-            </tr>
+            @for (r of lista; track r.id) {
+                <tr>
+                    <td>{{ r.tipo }}</td>
+                    <td class="ellipsis">{{ r.titulo }}</td>
+                    <td>{{ r.autor }}</td>
+                    <td>{{ r.editorial }}</td>
+                    <td class="center">{{ r.anio }}</td>
+                    <td>{{ r.categoria }}</td>
+                    @if (rol === 'Bibliotecario' || rol === 'Administrador') {
+                        <td class="center">{{ r.ejemplares }}</td>
+                    }
+                  <!-- columna de acciones -->
+                  <td class="acciones">
+                    @for (accion of accionesFila; track accion) {
+                      @switch (accion) {
+                        @case ('Ver') {
+                          <button class="icon icon--view" title="Ver" (click)="verDetalle(r)">
+                            <span class="material-symbols-rounded">visibility</span>
+                          </button>
+                        }
+                        @case ('EditarRecurso') {
+                          <button class="icon icon--view" title="Editar" (click)="editarRecurso(r)">
+                            <span class="material-symbols-rounded">edit_square</span>
+                          </button>
+                        }
+                        @case ('RegistrarEjemplar') {
+                          <button class="icon icon--view" title="Registrar Ejemplar" (click)="registrarEjemplar(r)">
+                            <span class="material-symbols-rounded">new_window</span>
+                          </button>
+                        }
+                      }
+                    }
+                  </td>
+                </tr>
           } @empty {
             <tr><td colspan="7" class="center muted">Sin resultados</td></tr>
           }
+        
         </tbody>
       </table>
 
@@ -172,19 +199,33 @@
 
     <!-- cinta verde/morada -->
     <div class="detalle__hdr">
+      @if (seleccion!.es_consulta_sala 
+        || rol === 'Usuario' 
+        || (rol === 'Bibliotecario' || rol === 'Administrador') && seleccion!.estado === 'Activo') {
       <span class="pill"
             [class.pill--purple]="seleccion!.es_consulta_sala"
-            [class.pill--green]]="!seleccion!.es_consulta_sala">
-        {{ seleccion!.es_consulta_sala ? 'Consulta en sala' : 'Puede reservar' }}
+            [class.pill--green]="!seleccion!.es_consulta_sala">
+        {{ seleccion!.es_consulta_sala 
+            ? 'Consulta en sala' 
+            : (rol === 'Usuario' 
+                  ? 'Puede reservar' 
+                  : 'Puede realizar el préstamo') }}
       </span>
-    </div>
+    }
+      @if (rol !== 'Usuario') {
+      <span class="pill" style="margin-left:8px;">
+        {{ seleccion!.fecha_ingreso | date:'dd/MM/yyyy' }}
+      </span>
+    }
+
+  </div>
 
     <div class="detalle">
-        <div class="det__left">
-         <div class="thumb">
+      <div class="det__left">
+        <div class="thumb">
           <img [src]="seleccion!.portadaUrl || 'assets/cover-placeholder.png'" loading="lazy">
         </div>
-        </div>
+      </div>
      
       <div class="det__right">
         <dl class="dl">
@@ -204,14 +245,42 @@
     @if (seleccion!.es_consulta_sala) {
       <div class="note note--warn">
         <span class="material-symbols-rounded">info</span>
-        Este recurso no puede ser reservado, solo consultado en sala
+       {{ rol === 'Usuario' 
+        ? 'Este recurso no puede ser reservado, solo consultado en sala' 
+        : ' No se puede realizar el préstamo, solo consultado en sala'
+      }}
       </div>
     } @else {
       <div class="acciones">
-        <button class="btn-primary" (click)="solicitarReserva(seleccion!)">
-          Solicitar reserva
-        </button>
-      </div>
+        @for (accion of accionesDetalle; track accion) {
+          @switch (accion) {
+            @case ('reservar') {
+              <button class="btn-primary" (click)="solicitarReserva(seleccion!)">
+                Solicitar reserva
+              </button>
+            }
+            @case ('prestamo') {
+              @if (seleccion!.estado === 'Activo') {
+            <div class="prestamo">
+              <span class="estado-prestamo">
+                {{ seleccion!.estado }}
+              </span>
+              <button class="btn-primary" (click)="realizarPrestamo(seleccion!)">
+                Realizar préstamo
+              </button>
+            </div>
+          } @else {
+            <!-- Mensaje cuando no está activo -->
+            <div class="note note--warn">
+              <span class="material-symbols-rounded">info</span>
+              Recurso no disponible para préstamo
+            </div>
+          }
+        }
+            
+       }
+     }
+    </div>          
     }
   </div>
 }
