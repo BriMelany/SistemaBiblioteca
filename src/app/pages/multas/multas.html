@@ -1,2 +1,148 @@
-<h2>Multas</h2>
-<p>(Aquí irá el listado/registro de multas.)</p>
+<section class="page">
+  <h2>Listado de multas</h2>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar__row--filters">
+        @if (rol === 'Administrador') {
+       <button class="btn-primary" [routerLink]="['/multas/acciones/configuracion']">
+            <span class="material-symbols-rounded">settings</span> Configuración de multas
+        </button>
+        }
+    </div>
+    <div class="toolbar__row--filters">
+      <div class="search">
+        <input [(ngModel)]="termino" (ngModelChange)="resetPage()"
+               type="text" placeholder="Buscar por nombre de Usuario o Código">
+        <span class="material-symbols-rounded">search</span>
+      </div>
+
+      <div class="estado">
+        <span>Estado:</span>
+        <select [(ngModel)]="estadoSel" (ngModelChange)="resetPage()">
+          <option [ngValue]="'Todas'">Todas</option>
+          <option [ngValue]="'Pendiente'">Pendiente</option>
+          <option [ngValue]="'Pagada'">Pagada</option>
+          <option [ngValue]="'Condonada'">Condonada</option>
+        </select>
+        <span class="material-symbols-rounded">expand_more</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card table-wrap">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Usuario</th>
+          <th>Cod Préstamo</th>
+          <th>Monto</th>
+          <th>Fecha de Generación</th>
+          <th>Días retraso</th>
+          <th>Estado</th>
+          <th>Detalle</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (m of filtrada; track m.id) {
+          <tr>
+            <td>{{ m.codigo }}</td>
+            <td class="ellipsis">{{ m.usuario }}</td>
+            <td>{{ m.codPrestamo }}</td>
+            <td>{{ m.monto | number:'1.2-2' }} S/.</td>
+            <td>{{ m.fechaGeneracion | date:'dd/MM/yyyy' }}</td>
+            <td>{{ m.diasRetraso }}</td>
+
+            <td>
+              <span class="badge"
+                [class.is-pendiente]="m.estado === 'Pendiente'"
+                [class.is-pagada]="m.estado === 'Pagada'"
+                [class.is-condonada]="m.estado === 'Condonada'">
+                {{ m.estado }}
+              </span>
+            </td>
+
+            <td class="center">
+              <button class="icon icon--view" title="Ver detalle" (click)="verDetalle(m)">
+                <span class="material-symbols-rounded">visibility</span>
+              </button>
+            </td>
+
+            <td class="center">
+              <button class="icon icon--pay" title="Pagar"
+                    (click)="abrirPago(m)" [disabled]="!puedePagar(m)">
+                <span class="material-symbols-rounded">payments</span>
+            </button>
+
+              @if (rol === 'Administrador') {
+                <button class="icon icon--waive" title="Condonar"
+                    (click)="abrirCondonacion(m)" [disabled]="!puedeCondonar(m)">
+                    <span class="material-symbols-rounded">money_off</span>
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="9" class="center muted">Sin resultados</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (filtrada.length > 0) {
+      <div class="pager">
+        <nav class="pager__nav">
+          <button class="pg-btn" (click)="prev()" [disabled]="pageIndex === 1">
+            <span class="material-symbols-rounded">chevron_left</span>
+          </button>
+
+          @for (p of pages; track p) {
+            <button class="pg-btn" [class.is-active]="p === pageIndex" (click)="goToPage(p)">{{ p }}</button>
+          }
+
+          <button class="pg-btn" (click)="next()" [disabled]="pageIndex === totalPages">
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+        </nav>
+      </div>
+    }
+  </div>
+</section>
+
+@if (modalAbierto && sel) {
+  <div class="modal is-open" role="dialog" aria-modal="true" (keydown.escape)="cerrarModal()" tabindex="-1">
+    <div class="modal__overlay" (click)="cerrarModal()"></div>
+
+    <div class="modal__card"
+         [class.modal--pay]="modalTipo==='pago'"
+         [class.modal--waive]="modalTipo==='condonacion'"
+         (click)="$event.stopPropagation()">
+
+      <div class="modal__header">
+        {{ modalTipo === 'pago' ? 'Registrar Pago' : 'Registrar Condonación' }}
+      </div>
+
+      <div class="modal__body">
+        <p><strong>Prestamo:</strong> {{ sel.codPrestamo }}</p>
+        <p><strong>Usuario:</strong> {{ sel.usuario }}</p>
+
+        <p *ngIf="modalTipo==='pago'">
+          <strong>Monto:</strong> {{ sel.monto | number:'1.2-2' }} S/.
+        </p>
+        <p *ngIf="modalTipo==='condonacion'">
+          <strong>Monto a subsanar:</strong> {{ sel.monto | number:'1.2-2' }} S/.
+        </p>
+      </div>
+
+      <div class="modal__actions">
+        <button class="btn btn-lg btn-primary" (click)="confirmarModal()">Confirmar</button>
+        <button class="btn btn-lg btn-gray" (click)="cerrarModal()">Regresar</button>
+      </div>
+    </div>
+  </div>
+}

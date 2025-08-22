@@ -1,0 +1,119 @@
+<section class="page">
+  <h2>{{ titulo }}</h2>
+
+  <div class="card rs-wrap">
+    <!-- Datos del usuario -->
+    <div class="rs-title">Datos del usuario:</div>
+
+    <div class="rs-grid">
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label">Id:</div>
+          <input [value]="form.id || '—'" readonly />
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Tipo Documento:</div>
+          <div class="select-wrap">
+            <select [(ngModel)]="form.tipoDocumento">
+              <option *ngFor="let t of tiposDoc" [ngValue]="t">{{ t }}</option>
+            </select>
+            <span class="material-symbols-rounded">expand_more</span>
+          </div>
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Nombre:</div>
+          <input [(ngModel)]="form.nombre" placeholder="Nombre" />
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Apellido Paterno:</div>
+          <input [(ngModel)]="form.apePaterno" placeholder="Apellido Pat" />
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Apellido Materno:</div>
+          <input [(ngModel)]="form.apeMaterno" placeholder="Apellido Mat" />
+        </div>
+      </div>
+
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label">Documento:</div>
+          <input [(ngModel)]="form.documento" placeholder="#12345678" />
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Dirección:</div>
+          <input [(ngModel)]="form.direccion" placeholder="Dirección" />
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Teléfono:</div>
+          <input [(ngModel)]="form.telefono" placeholder="999999999" />
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Email:</div>
+          <input [(ngModel)]="form.email" placeholder="usuario@mail.com" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos de la cuenta -->
+    <div class="rs-title">Datos de la cuenta:</div>
+
+    <div class="rs-grid">
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label">Nombre usuario:</div>
+          <input [(ngModel)]="form.username" placeholder="Usuario" />
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Contraseña Generada:</div>
+          <input [value]="form.passwordGenerada" readonly />
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Estado Cuenta:</div>
+          <div class="select-wrap">
+            <select [(ngModel)]="form.estadoCuenta">
+              <option *ngFor="let e of estados" [ngValue]="e">{{ e }}</option>
+            </select>
+            <span class="material-symbols-rounded">expand_more</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label">Rol:</div>
+          <div class="select-wrap">
+            <select [(ngModel)]="form.rol">
+              <option *ngFor="let r of roles" [ngValue]="r">{{ r }}</option>
+            </select>
+            <span class="material-symbols-rounded">expand_more</span>
+          </div>
+        </div>
+
+        <div class="rs-line">
+          <div class="rs-label">Fecha registro:</div>
+          <input type="date" [(ngModel)]="form.fechaRegistro" placeholder="dd/mm/yyyy" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-green" (click)="guardar()" [disabled]="guardando">
+      {{ guardando ? 'Guardando…' : 'Guardar Cambios' }}
+    </button>
+    <button class="btn btn-gray" (click)="volver()">Volver a la Lista</button>
+  </div>
+
+  @if (error) {
+    <p class="alert error">{{ error }}</p>
+  }
+</section>

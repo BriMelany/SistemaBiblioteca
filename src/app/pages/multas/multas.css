@@ -1,0 +1,142 @@
+:host{
+  /* Estados (Multas) */
+  --multa-pend-bg:#FEFFD9;  --multa-pend-fg:#9D9800;
+  --multa-pag-bg:#DCFCE7;   --multa-pag-fg:#065F46;
+  --multa-cond-bg:#EDE9FE;  --multa-cond-fg:#5B21B6;
+
+  /* Iconos / acciones */
+  --view-fg:#6A55F7;
+  --pay-bg:#EAFFF1;   --pay-fg:#16A34A;
+  --waive-bg:#F2EAFF; --waive-fg:#7C3AED;
+
+  /* Bordes / acentos */
+  --bdr:#a3aaf1;
+  --thead-fg:#5a62c4;
+  --row-bdr:#d7d9f8;
+}
+.material-symbols-rounded{
+  font-family:'Material Symbols Rounded';
+  font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24;
+}
+
+/* Título */
+.page h2{ color:#4450D9; margin:8px 0 16px; font-size:35px; }
+
+/* ========= Toolbar ========= */
+.toolbar{ display:flex; flex-direction:column; gap:20px; margin:20px 0 14px; }
+.toolbar > .toolbar__row--filters{ display:flex; align-items:center; gap:12px; }
+.toolbar > .toolbar__row--filters:first-child{ justify-content:flex-end; }     /* botón a la derecha */
+.toolbar > .toolbar__row--filters:last-child{ justify-content:space-between; } /* search ↔ estado */
+
+/* Botón primario (AMARILLO global) */
+.btn-primary{
+  display:inline-flex; align-items:center; gap:6px;
+  background:#f4d24b; color:#4450D9;
+  border:0; border-radius:10px;
+  padding:10px 14px; cursor:pointer;
+  font-size:20px; font-weight:600;
+}
+
+/* Buscador */
+.search{ position:relative; display:inline-flex; align-items:center; }
+.search input{ padding:10px 38px 10px 12px; border:1px solid var(--bdr); border-radius:10px; }
+.search input[type="date"]::-webkit-calendar-picker-indicator{ opacity:0; pointer-events:none; width:0; height:0; }
+.search .material-symbols-rounded{ position:absolute; right:.6rem; cursor:pointer; color:#4450D9; user-select:none; }
+
+/* Filtro estado */
+.estado{ position:relative; display:inline-flex; gap:8px; align-items:center; }
+.estado select{ padding:10px 32px 10px 12px; border:1px solid var(--bdr); border-radius:10px; appearance:none; }
+.search input[type="date"]:focus, .estado select:focus{ outline:none; box-shadow:none; border-color:#5b6ee1; }
+.estado .material-symbols-rounded{ position:absolute; right:8px; pointer-events:none; color:#5e5adb; }
+
+/* ========= Card / tabla ========= */
+.card{ background:#fff; border:1px solid #a3aaf1; border-radius:16px; padding:14px; box-shadow:0 2px 0 rgba(68,80,217,.08); }
+.table-wrap{ padding:12px; }
+
+.tabla{ width:100%; border-collapse:collapse; }
+.tabla th, .tabla td{
+  border-bottom:1.5px solid var(--row-bdr);
+  text-align:center; padding:12px 14px; height:44px; vertical-align:middle;
+}
+.tabla th{ color:var(--thead-fg); font-weight:700; border-bottom:3px solid var(--thead-fg); }
+.tabla tbody tr:hover{ background:#fafbff; }
+
+.muted{ color:#9aa0a6; }
+.center{ text-align:center; }
+.center .icon + .icon{ margin-left:10px; }
+.ellipsis{ max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* ========= Badges ========= */
+.badge{ padding:7px 15px; border-radius:15px; font-size:14px; font-weight:600; }
+.badge.is-pendiente{ background:var(--multa-pend-bg);  color:var(--multa-pend-fg); }
+.badge.is-pagada   { background:var(--multa-pag-bg);   color:var(--multa-pag-fg); }
+.badge.is-condonada{ background:var(--multa-cond-bg);  color:var(--multa-cond-fg); }
+
+/* ========= Iconos/acciones ========= */
+.icon{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:32px; height:32px; border:1px solid #fff;
+  background:#ffe985; border-radius:8px; padding:4px; cursor:pointer;
+}
+.icon:disabled{ opacity:.5; cursor:not-allowed; }
+.icon--view .material-symbols-rounded{ color:var(--view-fg); }
+.icon--pay{ background:var(--pay-bg); }   .icon--pay .material-symbols-rounded{ color:var(--pay-fg); }
+.icon--waive{ background:var(--waive-bg); }.icon--waive .material-symbols-rounded{ color:var(--waive-fg); }
+
+/* ========= Paginación ========= */
+.pager{ display:flex; justify-content:center; margin:12px 0 4px; }
+.pager__nav{ display:inline-flex; gap:6px; }
+.pg-btn{
+  border:1px solid var(--bdr);
+  min-width:34px; height:34px; border-radius:8px; padding:6px;
+  background:#fff; color:#4450D9; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; line-height:1;
+}
+.pg-btn .material-symbols-rounded{ color:currentColor; line-height:1; }
+.pg-btn.is-active{ background:#5653f6; border-color:#5b6ee1; color:#fff; }
+.pg-btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+/* ========= Modal ========= */
+.modal{ position:fixed; inset:0; display:grid; place-items:center; z-index:1000; }
+.modal__overlay{
+  position:absolute; inset:0;
+  background:rgba(34,40,70,.42);
+  backdrop-filter:blur(1px); -webkit-backdrop-filter:blur(1px);
+}
+.modal__card{
+  position:relative; z-index:1;
+  width:min(92vw, 500px); max-height:90vh; overflow:auto;
+  border-radius:16px; background:var(--modal-bg, #fff);
+  border:1.5px solid var(--modal-bdr, #e5e7ff);
+  box-shadow:0 12px 40px rgba(30,33,77,.25);
+}
+
+.modal__header{
+  padding:14px 18px; font-size:20px; font-weight:700;
+  border-radius:14px; margin:8px 8px 0; text-align:center;
+  background:var(--modal-head-bg, #4f46e5); color:var(--modal-head-fg, #fff);
+}
+.modal__body{ padding:16px 22px; font-size:16px; color:var(--modal-body-fg, inherit); }
+
+.modal__actions{ display:flex; gap:14px; justify-content:center; padding:15px; }
+
+.btn{ display:inline-flex; align-items:center; justify-content:center; padding:10px; border-radius:999px; border:0; cursor:pointer; font-weight:600; font-size:16px; }
+.btn-lg{ padding:14px 28px; font-size:16px; }
+.btn-gray{ background:#9e9e9e; color:#fff; }
+
+.modal__actions .btn-primary{
+  background:var(--modal-primary-bg, #4f46e5);
+  color:var(--modal-primary-fg, #fff);
+}
+.modal__card.modal--pay{
+  --modal-bg:#eafff1; --modal-bdr:#22c55e;
+  --modal-head-bg:#15803d; --modal-head-fg:#fff;
+  --modal-body-fg:#14532d;
+  --modal-primary-bg:#16a34a; --modal-primary-fg:#fff;
+}
+.modal__card.modal--waive{
+  --modal-bg:#eef0ff; --modal-bdr:#6366f1;
+  --modal-head-bg:#4f46e5; --modal-head-fg:#fff;
+  --modal-body-fg:#3f3cd1;
+  --modal-primary-bg:#4f46e5; --modal-primary-fg:#fff;
+}

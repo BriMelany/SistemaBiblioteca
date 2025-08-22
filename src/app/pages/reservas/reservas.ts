@@ -3,6 +3,7 @@ import { Component, inject, HostListener } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router'; 
+import { Router } from '@angular/router';
 
 type Estado = 'Activa' | 'Pendiente' | 'Cancelada' | 'Vencida';
 type Rol = 'Administrador' | 'Bibliotecario' | 'Usuario';
@@ -42,6 +43,7 @@ type Accion = 'ver' | 'cancelar' | 'actualizar' | 'descargar';
 })
 export class Reservas {
   private http = inject(HttpClient);
+  private router = inject(Router);
   readonly Math = Math;
 
   // ======== rol ========
@@ -177,14 +179,18 @@ reservas: Reserva[] = [
     this.seleccion.estado = 'Cancelada';
     this.cerrarTodo();
   }
+abrirCalendario(el: HTMLInputElement) {
+  if ((el as any).showPicker) { (el as any).showPicker(); }
+  else { el.focus(); el.click(); }
+}
 
-  // ======== Acciones extra (roles elevados) ========
-  actualizar(r: Reserva) {
-    // TODO: llamar API para refrescar estado de r
-    // this.http.post(`${API}/reservas/${r.id}/refresh`, {}).subscribe(...)
-    console.log('Actualizar estado de', r.id);
-  }
-
+actualizar(r: any) {
+  sessionStorage.setItem('selReserva', JSON.stringify(r));
+  this.router.navigate(
+    ['/reservas/acciones/actualiza-reserva'],
+    { state: { reserva: r }, queryParams: { id: r.id } }
+  );
+}
   descargar(r: Reserva) {
     // TODO: llamar API para generar/descargar comprobante (PDF)
     // this.http.get(`${API}/reservas/${r.id}/voucher`, { responseType:'blob' }).subscribe(...)
@@ -192,7 +198,6 @@ reservas: Reserva[] = [
   }
   cerrarTodo()    { this.mostrarConfirmar = false; this.seleccion = null; }
   cerrarDetalle() { this.seleccion = null; }
-
   @HostListener('document:keydown.escape')
   onEsc() { this.cerrarTodo(); }
 }

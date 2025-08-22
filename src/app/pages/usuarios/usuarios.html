@@ -1,0 +1,151 @@
+<section class="page">
+  <h2>Listado de Usuarios</h2>
+
+  <!-- Toolbar: buscador -->
+  <div class="toolbar">
+    <div class="toolbar__row--top">
+    @if (rol === 'Administrador') {
+      <button class="btn-primary"
+              [routerLink]="['/usuarios/acciones/editar']"
+              [queryParams]="{ nuevo: 1 }">
+        <span class="material-symbols-rounded">person_add</span>
+        Nuevo Usuario
+      </button>
+    }
+  </div>
+    <div class="toolbar__row--filters">
+      <div class="search">
+        <input
+          [(ngModel)]="termino"
+          (ngModelChange)="resetPage()"
+          type="text"
+          placeholder="Buscar por nombre de usuario" />
+        <span class="material-symbols-rounded">search</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card table-wrap">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Documento</th>
+          <th>Nombre completo</th>
+          <th>Rol</th>
+          <th>Teléfono</th>
+          <th>Dirección</th>
+          <th>Contraseña</th>
+          <th>Estado cuenta</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (r of paginada; track r.id) {
+          <tr>
+            <td>{{ r.id }}</td>
+            <td>{{ r.documento }}</td>
+            <td class="ellipsis">{{ r.nombre }}</td>
+            <td>{{ r.rol }}</td>
+            <td>{{ r.telefono }}</td>
+            <td class="ellipsis">{{ r.direccion }}</td>
+
+            <!-- Contraseña: texto plano -->
+            <td>{{ r.passwordEstado }}</td>
+
+            <!-- Estado de cuenta: badge -->
+            <td>
+              <span class="badge" [ngClass]="estadoBadgeClass(r.estadoCuenta)">
+                {{ r.estadoCuenta }}
+              </span>
+            </td>
+
+            <td class="center">
+              <button class="icon icon--edit" title="Editar" (click)="editar(r)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+
+             <button class="icon"
+                    [ngClass]="r.estadoCuenta === 'Bloqueo temporal' ? 'icon--lock' : 'icon--unlock'"
+                    [title]="r.estadoCuenta === 'Bloqueo temporal' ? 'Desbloquear' : 'Bloquear'"
+                    (click)="abrirBloqueo(r)">
+            <span class="material-symbols-rounded">
+                {{ r.estadoCuenta === 'Bloqueo temporal' ? 'lock' : 'lock_open' }}
+            </span>
+            </button>
+
+              <button class="icon icon--trash" title="Eliminar" (click)="abrirEliminar(r)">
+                <span class="material-symbols-rounded">delete</span>
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="9" class="center muted">Sin usuarios</td></tr>
+        }
+      </tbody>
+    </table>
+
+    @if (filtrada.length > 0) {
+      <div class="pager">
+        <nav class="pager__nav">
+          <button class="pg-btn" (click)="prev()" [disabled]="pageIndex === 1">
+            <span class="material-symbols-rounded">chevron_left</span>
+          </button>
+
+          @for (p of pages; track p) {
+            <button class="pg-btn" [class.is-active]="p === pageIndex" (click)="goToPage(p)">{{ p }}</button>
+          }
+
+          <button class="pg-btn" (click)="next()" [disabled]="pageIndex === totalPages">
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+        </nav>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- MODAL: Bloquear / Desbloquear -->
+@if (modalBloquear && sel) {
+  <div class="modal" (click)="cerrarModales()">
+    <div class="modal__overlay"></div>
+
+    <div class="modal__card modal--block" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        ¿Está seguro de {{ sel!.estadoCuenta==='Activo' ? 'Bloquear' : 'Desbloquear' }} esta cuenta?
+      </div>
+      <div class="modal__body">
+        <p><strong>Usuario:</strong> {{ sel!.nombre }}</p>
+        <p><strong>Documento:</strong> {{ sel!.documento }}</p>
+      </div>
+      <div class="modal__actions">
+        <button class="btn btn-lg btn-primary" (click)="confirmarBloqueo()">
+          <span class="material-symbols-rounded">lock</span>&nbsp; Sí
+        </button>
+        <button class="btn btn-lg btn-gray" (click)="cerrarModales()">Regresar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL: Eliminar -->
+@if (modalEliminar && sel) {
+  <div class="modal" (click)="cerrarModales()">
+    <div class="modal__overlay"></div>
+
+    <div class="modal__card modal--danger" (click)="$event.stopPropagation()">
+      <div class="modal__header">¿Está seguro de Eliminar esta cuenta?</div>
+      <div class="modal__body">
+        <p><strong>Usuario:</strong> {{ sel!.nombre }}</p>
+        <p><strong>Documento:</strong> {{ sel!.documento }}</p>
+      </div>
+      <div class="modal__actions">
+        <button class="btn btn-lg btn-primary" (click)="confirmarEliminar()">
+          <span class="material-symbols-rounded">delete</span>&nbsp; Sí
+        </button>
+        <button class="btn btn-lg btn-gray" (click)="cerrarModales()">Regresar</button>
+      </div>
+    </div>
+  </div>
+}

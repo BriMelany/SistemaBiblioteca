@@ -13,12 +13,12 @@
   </div>
   <div class="toolbar__row toolbar__row--filters">
     <label class="search">
-      <input type="date" #f (change)="cambiarFecha(f.value)">
-      <span class="material-symbols-rounded">calendar_month</span>
+    <input type="date" #f (change)="cambiarFecha(f.value)">
+      <span class="material-symbols-rounded" (click)="abrirCalendario(f)">calendar_month</span>
     </label>
 
     <label class="estado">
-      <span>Estado:</span>
+      <span class="estado__text">Estado:</span>
       <select #s (change)="cambiarEstado(s.value)">
         <option value="Activa">Activa</option>
         <option value="Pendiente">Pendiente</option>
@@ -137,19 +137,29 @@
   </div>
 <!-- MODAL: Confirmar cancelación -->
 @if (mostrarConfirmar && seleccion) {
-  <div class="modal-backdrop" (click)="cerrarTodo()"></div>
-  <div class="modal card modal--danger" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
-    <div class="modal__head">Cancelar Reserva</div>
-    <div class="modal__body">
-      <p>Se cancelará la reserva de:</p>
-      <p class="danger"><b>Libro con</b> “{{ seleccion!.titulo }}”</p>
-    </div>
+ <div class="modal-backdrop" (click)="cerrarTodo()"></div>
 
-    <div class="actions">
-      <button class="btn-danger" (click)="cancelar()">Confirmar</button>
-      <button class="btn-ghost" (click)="cerrarTodo()">Regresar</button>
-    </div>
+<div class="modal card modal--danger"
+     role="dialog" aria-modal="true"
+     aria-labelledby="modal-cancelar-head" aria-describedby="modal-cancelar-desc"
+     tabindex="0" (keydown.escape)="cerrarTodo()"
+     (click)="$event.stopPropagation()">
+
+  <div class="modal__head" id="modal-cancelar-head">Cancelar Reserva</div>
+
+  <div class="modal__body" id="modal-cancelar-desc">
+    <p>Se cancelará la reserva de:</p>
+    <p class="danger">
+      <strong>Recurso:</strong> {{ seleccion!.tipo }} — “{{ seleccion!.titulo }}”
+    </p>
   </div>
+
+  <div class="actions">
+    <button class="btn-danger" (click)="cancelar()">Confirmar</button>
+    <button class="btn-ghost" (click)="cerrarTodo()">Regresar</button>
+  </div>
+</div>
+
 }
 
 <!-- MODAL: Detalle -->

@@ -1,0 +1,156 @@
+<section class="page">
+  <h2>Configuración de multas</h2>
+
+  <!-- Bloque: Datos del configuración -->
+  <div class="card cfg-wrap">
+    <div class="cfg-title">Datos del configuración:</div>
+
+    <div class="cfg-grid">
+      <div class="cfg-col">
+        <div class="cfg-line">
+          <div class="cfg-label">Rol:</div>
+          <div class="select-wrap">
+            <select [(ngModel)]="form.rol">
+              <option *ngFor="let r of roles" [ngValue]="r">{{ r }}</option>
+            </select>
+            <span class="material-symbols-rounded">expand_more</span>
+          </div>
+        </div>
+
+        <div class="cfg-line">
+          <div class="cfg-label">Monto por día:</div>
+          <input type="number" min="0" step="0.01" [(ngModel)]="form.montoDia" placeholder="00.00 S/." />
+        </div>
+      </div>
+
+      <div class="cfg-col">
+        <div class="cfg-line">
+          <div class="cfg-label">Tipo de recurso:</div>
+          <div class="select-wrap">
+            <select [(ngModel)]="form.tipoRecurso">
+              <option [ngValue]="''" disabled>Seleccione un recurso</option>
+              <option *ngFor="let t of tiposRecurso" [ngValue]="t">{{ t }}</option>
+            </select>
+            <span class="material-symbols-rounded">expand_more</span>
+          </div>
+        </div>
+
+        <div class="cfg-line">
+          <div class="cfg-label">Días máximo de retraso:</div>
+          <input type="number" min="0" step="1" [(ngModel)]="form.diasMax" placeholder="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="cfg-actions">
+      <button class="btn btn-indigo" [disabled]="!isValid" (click)="crearActualizar()">
+        {{ btnLabel }}
+      </button>
+
+      <button class="btn btn-gray" *ngIf="editId" (click)="resetForm()">
+        Cancelar edición
+      </button>
+    </div>
+  </div>
+
+  <!-- Bloque: Lista generada -->
+  <div class="card table-wrap">
+  <div class="cfg-title">Lista Generada:</div>
+
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Rol</th>
+        <th>Tipo de recurso</th>
+        <th>Monto x día</th>
+        <th>Días de retraso (max)</th>
+        <th>Monto máximo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let it of paginada"
+          [class.is-editing]="editId === it.id"
+          [attr.aria-current]="editId === it.id ? 'true' : null">
+        <td>{{ it.id }}</td>
+        <td class="ellipsis">{{ it.rol }}</td>
+        <td class="ellipsis">{{ it.tipoRecurso }}</td>
+        <td>{{ it.montoDia | number:'1.2-2' }} S/.</td>
+        <td>{{ it.diasMax }}</td>
+        <td>{{ montoMax(it) | number:'1.2-2' }} S/.</td>
+        <td class="center">
+          <button class="icon icon--edit"  title="Editar"   (click)="editar(it)">
+            <span class="material-symbols-rounded">edit</span>
+          </button>
+          <button class="icon icon--trash" title="Eliminar" (click)="pedirEliminar(it)">
+            <span class="material-symbols-rounded">delete</span>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="lista.length === 0">
+        <td colspan="7" class="center muted">Sin configuraciones</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Paginación -->
+  <div class="pager" *ngIf="lista.length > 0">
+    <nav class="pager__nav">
+      <button class="pg-btn" (click)="prev()" [disabled]="pageIndex === 1">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+
+      <button class="pg-btn"
+              *ngFor="let p of pages"
+              [class.is-active]="p === pageIndex"
+              (click)="goToPage(p)">{{ p }}</button>
+
+      <button class="pg-btn" (click)="next()" [disabled]="pageIndex === totalPages">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </button>
+    </nav>
+  </div>
+
+    <div class="cfg-footer">
+    <p class="hint">
+        — Columna generada: <b>Monto máximo</b> se calcula automáticamente como
+        <code>monto_por_día × días_máximos</code>.
+    </p>
+   <button class="btn btn-indigo" (click)="volver()">Regresar</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+<div class="toast"
+     *ngIf="toast.show"
+     [class.toast--ok]="toast.type === 'ok'"
+     [class.toast--err]="toast.type === 'err'">
+  <span class="material-symbols-rounded">
+    {{ toast.type === 'ok' ? 'task_alt' : 'error' }}
+  </span>
+  <span class="toast__text">{{ toast.text }}</span>
+  <button class="toast__close" (click)="hideToast()" aria-label="Cerrar">
+    <span class="material-symbols-rounded">close</span>
+  </button>
+</div>
+</section>
+
+<!-- Modal eliminar -->
+@if (showDelete && toDelete) {
+  <div class="modal-backdrop" (click)="cerrarModal()"></div>
+  <div class="modal card modal--danger" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal__head">Eliminar configuración</div>
+    <div class="modal__body">
+      <p>Se eliminará el registro:</p>
+      <p class="danger">
+        <strong>{{ toDelete!.rol }}</strong> — {{ toDelete!.tipoRecurso }}
+        ({{ toDelete!.montoDia | number:'1.2-2' }} S/. × {{ toDelete!.diasMax }} días)
+      </p>
+    </div>
+    <div class="actions">
+      <button class="btn-danger" (click)="confirmarEliminar()">Confirmar</button>
+      <button class="btn-ghost" (click)="cerrarModal()">Regresar</button>
+    </div>
+  </div>
+}

@@ -21,9 +21,12 @@ export const routes: Routes = [
       { path: 'catalogo',  loadComponent: () => import('./pages/catalogo/catalogo').then(m => m.Catalogo) },
       { path: 'reservas',  loadComponent: () => import('./pages/reservas/reservas').then(m => m.Reservas) },
       { path: 'prestamos', loadComponent: () => import('./pages/prestamos/prestamos').then(m => m.Prestamos) },
-      { path: 'multas',    loadComponent: () => import('./pages/multas/multas').then(m => m.Multas) },
-      { path: 'reservas/acciones/registra-reserva', loadComponent: () =>import('./pages/reservas/acciones/registra-reserva/registra-reserva').then(m => m.RegistraReserva),
-},
+      { path: 'multas',    loadComponent: () => import('./pages/multas/multas').then(m => m.Multas)},
+      { path: 'usuarios',  loadComponent: () => import('./pages/usuarios/usuarios').then(m => m.Usuarios),},
+      { path: 'reservas/acciones/registra-reserva', loadComponent: () =>import('./pages/reservas/acciones/registra-reserva/registra-reserva').then(m => m.RegistraReserva)},
+      { path: 'reservas/acciones/actualiza-reserva', loadComponent: () =>import('./pages/reservas/acciones/actualiza-reserva/actualiza-reserva').then(m => m.ActualizaReserva)},
+      { path: 'multas/acciones/configuracion', loadComponent: () =>import('./pages/multas/acciones/configuracion/configuracion').then(m => m.Configuracion)},
+      { path: 'usuarios/acciones/editar',  loadComponent: () => import('./pages/usuarios/acciones/editar-usuario/editar-usuario').then(m => m.EditarUsuario)},
     ]
   },
 

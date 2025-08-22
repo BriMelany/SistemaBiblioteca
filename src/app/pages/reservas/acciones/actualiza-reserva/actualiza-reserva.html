@@ -1,1 +1,160 @@
-<p>actualiza-reserva works!</p>
+<section class="page">
+  <h2>Actualizar Reserva</h2>
+
+  @if (cargando) {
+    <div class="loading">
+      <span class="material-symbols-rounded">hourglass_top</span> Cargando…
+    </div>
+  } @else if (error) {
+    <div class="alert error">{{ error }}</div>
+  } @else {
+
+    
+    <!-- DATOS DEL USUARIO -->
+    <div class="card rs-wrap">
+      <div class="rs-title">Datos del usuario:</div>
+      <div class="rs-grid">
+        <div class="rs-col">
+          <div class="rs-line">
+            <div class="rs-label">Código de usuario:</div>
+            <input [value]="usuario.codigo" readonly>
+          </div>
+          <div class="rs-line">
+            <div class="rs-label">Nombre:</div>
+            <input [value]="usuario.nombre" readonly>
+          </div>
+        </div>
+        <div class="rs-col">
+          <div class="rs-line">
+            <div class="rs-label">Tipo de usuario:</div>
+            <input [value]="usuario.tipo" readonly>
+          </div>
+          <div class="rs-line">
+            <div class="rs-label">Estado:</div>
+            <input [value]="usuario.estado" readonly>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATOS DEL RECURSO -->
+      <div class="rs-title">Datos del Recurso:</div>
+      <div class="rs-grid">
+        <div class="rs-col">
+          <div class="rs-line">
+            <div class="rs-label">Imagen referencial:</div>
+            <div class="img-box">
+              <img [src]="recurso.portadaUrl || 'assets/cover-placeholder.png'" alt="Portada" loading="lazy">
+              <span class="material-symbols-rounded placeholder" *ngIf="!recurso?.portadaUrl">image</span>
+            </div>
+          </div>
+        </div>
+        <div class="rs-col">
+          <div class="rs-line">
+            <div class="rs-label">Tipo de recurso:</div>
+            <input [value]="recurso.tipo || ''" readonly>
+          </div>
+          <div class="rs-line">
+            <div class="rs-label">Título:</div>
+            <input [value]="recurso.titulo || ''" readonly>
+          </div>
+          <div class="rs-line">
+            <div class="rs-label">Autor:</div>
+            <input [value]="recurso.autor || ''" readonly>
+          </div>
+          <div class="rs-line">
+            <div class="rs-label">Editorial:</div>
+            <input [value]="recurso.editorial || ''" readonly>
+          </div>
+        </div>
+      </div>
+
+      <!-- PENALIDADES -->
+   
+      <div class="rs-title">Penalidades:</div>
+      <div class="rs-grid">
+        <div class="rs-col">
+          <div class="rs-line">
+            <div class="rs-label">Resultado de búsqueda:</div>
+            <input [value]="resultadoPenalidadTexto" readonly>
+          </div>
+        </div>
+
+        <div class="rs-col">
+          <div class="rs-line">
+            <div class="rs-label">Monto:</div>
+            <input [value]="(montoPenalidad | number:'1.2-2') + ' S/.'" readonly>
+          </div>
+        </div>
+      </div>
+      <!-- DETALLE DE RESERVA -->
+      <div class="rs-title">Detalle de Reserva:</div>
+      <div class="rs-grid">
+        <div class="rs-col">
+          <div class="rs-line">
+            <div class="rs-label">Prioridad:</div>
+            <input [value]="prioridad" readonly>
+          </div>
+
+          <div class="rs-line">
+            <div class="rs-label">Fecha de reserva:</div>
+            <input type="text" [value]="fechaReserva ? (fechaReserva | date:'dd/MM/yyyy') : ''" readonly>
+          </div>
+
+          <div class="rs-line">
+            <div class="rs-label">Notificación:</div>
+                @if (soloLecturaTotal) {
+                    <input [value]="notificacion" readonly>
+                } @else {
+                    <select [(ngModel)]="notificacion" (ngModelChange)="onNotificacionChange($event)"
+                            [disabled]="notificacionBloqueada">
+                    <option *ngFor="let opt of opcionesNotificacion" [ngValue]="opt">{{ opt }}</option>
+                    </select>
+                }
+          </div>
+
+           <div class="rs-line">
+                <div class="rs-label">Estado:</div>
+                @if (soloLecturaTotal) {
+                    <input [value]="estadoReserva" readonly>
+                } @else {
+                    <select [(ngModel)]="estadoReserva">
+                    <option *ngFor="let e of estadosDisponibles" [ngValue]="e">{{ e }}</option>
+                    </select>
+                }
+            </div>
+        </div>
+
+        <div class="rs-col">
+          <div class="rs-line">
+            <div class="rs-label">Fecha de expiración:</div>
+            <input type="text" [value]="fechaExpiracion ? (fechaExpiracion | date:'dd/MM/yyyy') : ''" readonly>
+          </div>
+
+          <div class="rs-line">
+            <div class="rs-label">Fecha Notificación:</div>
+            <input type="text"
+                   [value]="fechaNotificacion ? (fechaNotificacion | date:'dd/MM/yyyy') : ''"
+                   readonly placeholder="dd/mm/yyyy (hoy)">
+          </div>
+
+          <div class="rs-line">
+            <div class="rs-label">Sustento:</div>
+            <textarea [(ngModel)]="sustento" rows="4" placeholder="Describa el sustento del estado"
+                [readonly]="soloLecturaTotal"></textarea>
+          </div>
+        </div>
+      </div>
+    </div> <!-- /.card -->
+
+    <!-- Acciones -->
+    <div class="actions">
+       <button type="button" class="btn btn-green" (click)="actualizar()" [disabled]="soloLecturaTotal">
+            Actualizar Reserva
+        </button>
+
+      <a class="btn btn-gray" [routerLink]="['/reservas']" role="button">
+        Regresar a Lista
+      </a>
+    </div>
+  }
+</section>
