@@ -1,1 +1,271 @@
-<p>editar-recurso works!</p>
+<section class="page">
+    <h2>Editar Recurso</h2>
+
+    <!-- Barra de progreso -->
+    <div class="progress-bar">
+        <div [class.active]="pagina === 1">1. Datos del Recurso</div>
+        <div [class.active]="pagina === 2">2. Autores y Generales</div>
+    </div>
+
+    <div class="card rs-wrap">
+
+        <!-- Paso 1: Datos del Recurso -->
+        <div *ngIf="pagina === 1">
+            <div class="rs-title">Datos del Recurso:</div>
+            <div class="rs-grid ">
+                <div class="rs-col">
+                    <div class="rs-line">
+                        <div class="rs-label">Título:</div>
+                        <input [(ngModel)]="form.titulo" placeholder="Título del recurso" />
+                    </div>
+                    <div class="rs-line">
+                        <div class="rs-label">Subtítulo:</div>
+                        <input [(ngModel)]="form.subtitulo" placeholder="Subtítulo del recurso" />
+                    </div>
+                    <div class="rs-line">
+                        <div class="rs-label">Tipo de Recurso:</div>
+                        <div class="select-wrap">
+                            <select [(ngModel)]="form.tipo">
+                                <option *ngFor="let t of tipos" [value]="t">{{ t }}</option>
+                            </select>
+                            <span class="material-symbols-rounded">expand_more</span>
+                        </div>
+                    </div>
+                    <div class="rs-line">
+                        <div class="rs-label">Género:</div>
+                        <div class="select-wrap">
+                            <select [(ngModel)]="form.genero">
+                                <option *ngFor="let g of generos" [value]="g">{{ g }}</option>
+                            </select>
+                            <span class="material-symbols-rounded">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rs-col">
+                    <div class="rs-line">
+                        <div class="rs-label">ISBN:</div>
+                        <input [(ngModel)]="form.isbn" placeholder="ISBN" />
+                    </div>
+                    <div class="rs-line">
+                        <div class="rs-label">Editorial:</div>
+                        <input [(ngModel)]="form.editorial" placeholder="Editorial" />
+                    </div>
+                    <div class="rs-line">
+                        <div class="rs-label">Edición:</div>
+                        <input [(ngModel)]="form.edicion" placeholder="Edición" />
+                    </div>
+                    <div class="rs-line">
+                        <div class="rs-label">Año de publicación:</div>
+                        <input type="number" [(ngModel)]="form.anioPublicacion" placeholder="Año" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rs-grid">
+                <div class="rs-col">
+                    <div class="rs-line">
+                        <div class="rs-label">Clasificación:</div>
+                        <input [(ngModel)]="form.clasificacion" placeholder="Clasificación" />
+                    </div>
+                </div>
+                <div class="rs-col">
+                    <div class="rs-line">
+                        <div class="rs-label">Fecha de Ingreso:</div>
+                        <input type="date" [(ngModel)]="form.fechaIngreso" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rs-grid">
+                <div class="rs-line2 full-width">
+                    <div class="rs-label textarea-line">Descripción:</div>
+                    <textarea [(ngModel)]="form.descripcion" rows="4"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paso 2: Autores y Datos Generales -->
+        <div *ngIf="pagina === 2">
+            <!-- Autores -->
+            <div class="rs-title rs-title-row">
+                <span>Datos de los Autores:</span>
+                <div class="actions-inline">
+                    <button class="btn btn-primary" (click)="listarAutores()">Lista de Autores</button>
+                    <button class="btn btn-primary" (click)="crearAutor()">Crear Autor</button>
+                </div>
+            </div>
+
+            <div class="rs-grid">
+                <div class="rs-col">
+                    <div class="rs-line">
+                        <div class="rs-label">Autor:</div>
+                        <input [(ngModel)]="autorSeleccionado" placeholder="Seleccione un autor" readonly />
+                    </div>
+                </div>
+                <div class="rs-col">
+                    <div class="rs-line">
+                        <div class="rs-label">Tipo:</div>
+                        <div class="select-wrap">
+                            <select [(ngModel)]="tipoAutor">
+                                <option *ngFor="let t of tiposAutor" [value]="t">{{ t }}</option>
+                            </select>
+                            <span class="material-symbols-rounded">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rs-grid">
+                <div class="full-width actions2">
+                    <button class="btn btn-primary" (click)="agregarAutor()">Agregar Autor</button>
+                </div>
+            </div>
+
+
+            <table class="tabla-autores">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>País</th>
+                        <th>Tipo</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let a of autores; let i = index">
+                        <td>{{ a.nombre }}</td>
+                        <td>{{ a.apellido }}</td>
+                        <td>{{ a.pais }}</td>
+                        <td>{{ a.tipo }}</td>
+                        <td>
+                            <button class="btn btn-gray" (click)="eliminarAutor(i)">
+                                <span class="material-symbols-rounded">delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Datos Generales -->
+            <div class="rs-title">Datos Generales:</div>
+            <div class="rs-grid">
+                <div class="rs-line radio-group full-width">
+                    <div class="rs-label">Estado:</div>
+                    <label><input type="radio" [(ngModel)]="form.estado" value="activo" /> Activo</label>
+                    <label><input type="radio" [(ngModel)]="form.estado" value="restringido" /> Restringido</label>
+                    <label><input type="radio" [(ngModel)]="form.estado" value="revision" /> En revisión</label>
+                </div>
+
+                <div class="rs-line checkbox-line full-width">
+                    <div class="rs-label">Consulta en sala:</div>
+                    <input type="checkbox" [(ngModel)]="form.consultaSala" />
+                </div>
+            </div>
+
+            <div class="rs-grid">
+                <div class="rs-line2 full-width">
+                    <div class="rs-label textarea-line">Observaciones:</div>
+                    <textarea [(ngModel)]="form.observaciones" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="rs-grid">
+                <div class="rs-line2 full-width">
+                    <div class="rs-label">Imagen referencial:</div>
+                    <div class="imagen-subida">
+                        <input type="file" (change)="subirImagen($event)" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rs-grid">
+                <div class="rs-line full-width">
+                     <button class="btn btn-primary" (click)="registrar()">Editar Recurso</button>
+                </div>
+            </div>
+        </div>
+       
+    </div>
+
+    <!-- Navegación -->
+    <div class="actions-center">
+        <button class="btn btn-primary" (click)="anterior()" [disabled]="pagina === 1">Anterior</button>
+        <button class="btn btn-primary" (click)="siguiente()" *ngIf="pagina < totalPaginas">Siguiente</button>
+
+        <button class="btn btn-primary" (click)="registrar()" *ngIf="pagina === totalPaginas" [disabled]="guardando">
+            {{ guardando ? 'Guardando…' : 'Registrar Recurso' }}
+        </button>
+
+        <button class="btn btn-primary" (click)="volver()">Regresar a Lista</button>
+    </div>
+</section>
+
+<!-- ================== MODAL CREAR AUTOR ================== -->
+<div class="modal" [class.show]="modalAbierto === 'crear'">
+  <div class="modal-content">
+    <h3>Crear Nuevo Autor</h3>
+
+    <div class="form-line">
+      <label>Nombre:</label>
+      <input [(ngModel)]="nuevoAutor.nombre" placeholder="Nombre del autor" />
+    </div>
+
+    <div class="form-line">
+      <label>Apellido:</label>
+      <input [(ngModel)]="nuevoAutor.apellido" placeholder="Apellido del autor" />
+    </div>
+
+    <div class="form-line">
+      <label>País:</label>
+      <input [(ngModel)]="nuevoAutor.pais" placeholder="País del autor" />
+    </div>
+
+    <div class="form-line">
+      <label>Biografía:</label>
+      <textarea [(ngModel)]="nuevoAutor.biografia" rows="4" placeholder="Escribe una breve biografía..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" (click)="guardarNuevoAutor()">Crear Autor</button>
+      <button class="btn btn-primary" (click)="cerrarModal()">Volver</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================== MODAL LISTA AUTORES ================== -->
+<div class="modal" [class.show]="modalAbierto === 'lista'">
+  <div class="modal-content wide">
+    <h3>Lista de Autores</h3>
+
+    <input class="search-box" type="text" [(ngModel)]="filtro" placeholder="Buscar por nombre..." />
+
+    <table class="authors-table">
+      <thead>
+        <tr>
+          <th>Seleccionar</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>País</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let autor of autoresFiltrados">
+          <td>
+            <button class="btn btn-blue" (click)="seleccionarAutor(autor)">
+              Agregar
+            </button>
+          </td>
+          <td>{{ autor.nombre }}</td>
+          <td>{{ autor.apellido }}</td>
+          <td>{{ autor.pais }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" (click)="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>

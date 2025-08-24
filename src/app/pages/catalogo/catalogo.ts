@@ -91,7 +91,10 @@ verDetalle(r: Recurso) {
 }
 
 editarRecurso(r: Recurso) {
-  this.router.navigate(['catalogo/acciones/editar-recurso'], { state: { recurso: r }, queryParams: { id: r.id } });
+  this.router.navigate(
+    ['catalogo/acciones/editar-recurso'],
+    { state: { recurso: r } } 
+  );
 }
 
 registrarEjemplar(r: Recurso) {

@@ -1,1 +1,101 @@
-<p>registrar-ejemplar works!</p>
+<section class="page">
+  <h2>Registro de Nuevo Ejemplar</h2>
+
+  <div class="card rs-wrap">
+    <!-- Datos del Recurso -->
+    <div class="rs-title">Datos del Recurso:</div>
+    <div class="rs-grid">
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label">Título:</div>
+            <span>{{ tituloRecurso }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos del Ejemplar -->
+    <div class="rs-title">Datos del Ejemplar:</div>
+    <div class="rs-grid">
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label">Código de Barras:</div>
+          <input [(ngModel)]="form.codigoBarras" placeholder="Código de Barras" />
+        </div>
+        <div class="rs-line">
+          <div class="rs-label">Estado físico:</div>
+          <div class="select-wrap">
+            <select [(ngModel)]="form.estadoFisico" name="estadoFisico">
+                  <option *ngFor="let e of estadosFisicos" [value]="e">{{ e }}</option>
+            </select>
+            <span class="material-symbols-rounded">expand_more</span>
+          </div>
+        </div>
+      </div>
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label">Fecha de ingreso:</div>
+          <input type="date" [(ngModel)]="form.fechaIngreso" />
+        </div>
+        <div class="rs-line">
+          <div class="rs-label">Ubicación:</div>
+          <div class="select-wrap">
+            <select [(ngModel)]="form.ubicacion">
+              <option *ngFor="let u of ubicaciones" [value]="u">{{ u }}</option>
+            </select>
+            <span class="material-symbols-rounded">expand_more</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalles de Adquisición -->
+    <div class="rs-title">Detalles de Adquisición:</div>
+    <div class="rs-grid">
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label">Costo:</div>
+          <input type="number" [(ngModel)]="form.costo_adquisicion" placeholder="S/." />
+        </div>
+      </div>
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label">Proveedor:</div>
+          <div class="select-wrap">
+            <select [(ngModel)]="form.proveedor_id">
+                 <option *ngFor="let p of proveedores" [value]="p.id">{{ p.nombre }}</option>
+            </select>
+            <span class="material-symbols-rounded">expand_more</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prestamo y Observaciones -->
+    <div class="rs-grid">
+      <div class="rs-col">
+        <div class="rs-line">
+          <div class="rs-label checkbox-line">Disponible para Préstamo:</div>
+          <input type="checkbox" [(ngModel)]="form.disponiblePrestamo" />
+        </div>
+      </div>
+    </div>
+    <div class="rs-grid">
+      <div class="rs-line2 full-width">
+        <div class="rs-label  textarea-line">Observaciones:</div>
+        <textarea [(ngModel)]="form.observaciones" rows="4"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-green" (click)="registrar()" [disabled]="guardando">
+      {{ guardando ? 'Guardando…' : 'Registrar Ejemplar' }}
+    </button>
+    <button class="btn btn-gray" (click)="volver()">Regresar a Lista</button>
+  </div>
+
+  @if (error) {
+    <p class="alert error">{{ error }}</p>
+  }
+</section>
+

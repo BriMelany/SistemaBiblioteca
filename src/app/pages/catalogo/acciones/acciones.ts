@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-acciones',
-  imports: [],
-  templateUrl: './acciones.html',
-  styleUrl: './acciones.css'
+  standalone: true, 
+  imports: [RouterOutlet], 
+  template: `<router-outlet></router-outlet>`
 })
-export class Acciones {
-
-}
+export class Acciones {}
