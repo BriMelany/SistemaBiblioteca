@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './auth-guard'; 
 
 export const routes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -8,6 +9,7 @@ export const routes: Routes = [
     path: '',
     loadComponent: () => import('./layouts/public/public').then(m => m.PublicComponent),
     children: [
+      { path: '', pathMatch: 'full', redirectTo: 'login' },
       { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.LoginComponent) }
     ]
   },
@@ -16,7 +18,10 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./layouts/app/app').then(m => m.AppComponentLayout),
+    canActivate: [authGuard],// protege todo lo de abajo
+    canActivateChild: [authGuard],
     children: [
+      { path: '', pathMatch: 'full', redirectTo: 'inicio' },//logueado: manda a inicio
       { path: 'inicio',    loadComponent: () => import('./pages/inicio/inicio').then(m => m.Inicio) },
       { path: 'catalogo',  loadComponent: () => import('./pages/catalogo/catalogo').then(m => m.Catalogo) },
       { path: 'reservas',  loadComponent: () => import('./pages/reservas/reservas').then(m => m.Reservas) },

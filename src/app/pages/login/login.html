@@ -1,5 +1,98 @@
-<section style="max-width:360px;margin:40px auto">
-      <h2>Login (pendiente)</h2>
-      <!-- aquí luego irá tu formulario y lógica -->
-       <button type="button" routerLink="/inicio">Ingresar</button>
-    </section>
+<!-- login.component.html -->
+<div class="login-page">
+  <!-- Panel izquierdo (ilustración / logo) -->
+  <section class="brand-panel" aria-hidden="true">
+    <div class="brand-card">
+      <!-- Coloca aquí tu logo o imagen -->
+      <div class="img-placeholder">
+        <svg viewBox="0 0 64 64" role="img" aria-label="Ilustración">
+          <rect x="2" y="10" width="60" height="44" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="46" cy="23" r="3" fill="currentColor"/>
+          <polyline points="10,44 26,26 36,38 42,32 54,44" fill="none" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel derecho (formulario) -->
+  <section class="form-panel">
+    <h1 class="title">Iniciar sesión</h1>
+
+    <div class="card">
+      <div class="avatar">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="24" r="12"></circle>
+          <path d="M12 56c0-11 9-20 20-20s20 9 20 20" />
+        </svg>
+      </div>
+
+      <!-- Reactive Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <!-- Usuario -->
+        <div class="field">
+          <label for="username">Usuario:</label>
+          <input
+            id="username"
+            type="text"
+            placeholder="Ingresa su usuario"
+            formControlName="username"
+            autocomplete="username"
+            [class.is-invalid]="form.get('username')?.touched && form.get('username')?.invalid"
+          />
+          <small class="error" *ngIf="form.get('username')?.touched && form.get('username')?.hasError('required')">
+            El usuario es obligatorio.
+          </small>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="field">
+            <label for="password">Contraseña:</label>
+            <div class="password-wrap">
+                  <input
+                        id="password"
+                        [type]="showPwd ? 'text' : 'password'"
+                        placeholder="••••••••"
+                        formControlName="password"
+                        autocomplete="current-password"
+                        [class.is-invalid]="form.get('password')?.touched && form.get('password')?.invalid"
+                  />
+
+                  <button type="button"
+                              class="toggle-eye"
+                              (click)="showPwd = !showPwd"
+                              [attr.aria-pressed]="showPwd"
+                              aria-label="Mostrar u ocultar contraseña">
+                        <span class="material-symbols-rounded"
+                              [class.filled]="showPwd"
+                              aria-hidden="true">
+                        {{ showPwd ? 'visibility_off' : 'visibility' }}
+                        </span>
+                  </button>
+                  </div>
+            </div>
+        <!-- Mensajes de estado (opcional: controla con flags del TS) -->
+       <div class="system-messages" *ngIf="loginError">
+            <p class="msg error">{{ loginError }}</p>
+      </div>
+
+        <!-- Botón ingresar -->
+        <button class="btn primary"
+                type="submit"
+                [disabled]="form.invalid || loading">
+          <span *ngIf="!loading">Ingresar</span>
+          <span *ngIf="loading" class="spinner" aria-live="polite">Validando…</span>
+        </button>
+
+        <!-- Acciones secundarias -->
+        <div class="links">
+          <a [routerLink]="['/auth/change-password']">Cambiar tu contraseña</a>
+        </div>
+      </form>
+    </div>
+
+    <p class="register">
+      ¿No tienes una cuenta?
+      <a [routerLink]="['/auth/register']">Registrate</a>
+    </p>
+  </section>
+</div>

@@ -1,28 +1,23 @@
-import { Component, Input, ElementRef, HostListener } from '@angular/core';
+import { Component, Input, ElementRef, HostListener, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../core/auth/auth';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css'
 })
 export class TopbarComponent {
-  @Input() userName = 'Nombre Usuario';
-  @Input() notifCount = 1;
-  @Input() alertText: string | null = 'Usted tiene 1 reserva aprobada';
+  @Input() notifCount = 0;
+  @Input() alertText: string | null = null;
 
   showAlert = false;
-
+  auth = inject(AuthService);
   constructor(private el: ElementRef) {}
 
-  toggleAlert(ev: MouseEvent) {
-    ev.stopPropagation();           // no cierres inmediatamente
-    this.showAlert = !this.showAlert;
-  }
-
+  toggleAlert(ev: MouseEvent) { ev.stopPropagation(); this.showAlert = !this.showAlert; }
   @HostListener('document:click', ['$event'])
-  onDocClick(ev: MouseEvent) {
-    // cierra si se hace click fuera del topbar
-    if (!this.el.nativeElement.contains(ev.target)) this.showAlert = false;
-  }
+  onDocClick(ev: MouseEvent) { if (!this.el.nativeElement.contains(ev.target)) this.showAlert = false; }
 }

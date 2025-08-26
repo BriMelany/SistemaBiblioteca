@@ -1,16 +1,14 @@
 <header class="tb">
   <div class="tb__group tb__group--left">
     <div class="tb__notif">
-  <button type="button" class="tb__bell" (click)="toggleAlert($event)">
-    @if (notifCount > 0) { <span class="tb__badge">{{ notifCount }}</span> }
-    <span class="material-symbols-rounded tb__bell-icon">notifications</span>
-  </button>
-
-  @if (showAlert && alertText) {
-    <div class="tb__popover" role="status">{{ alertText }}</div>
-  }
-</div>
-
+      <button type="button" class="tb__bell" (click)="toggleAlert($event)">
+        @if (notifCount > 0) { <span class="tb__badge">{{ notifCount }}</span> }
+        <span class="material-symbols-rounded tb__bell-icon">notifications</span>
+      </button>
+      @if (showAlert && alertText) {
+        <div class="tb__popover" role="status">{{ alertText }}</div>
+      }
+    </div>
   </div>
 
   <div class="tb__group tb__group--right">
@@ -18,7 +16,8 @@
       <span class="tb__avatar">
         <span class="material-symbols-rounded" style="color:#fff;font-size:20px">person</span>
       </span>
-      <span class="tb__name">{{ userName }}</span>
+      @let user = (auth.user$ | async);
+      <span class="tb__name">{{ user?.nombreCompleto || 'Usuario' }}</span>
     </div>
   </div>
 </header>

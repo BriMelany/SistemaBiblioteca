@@ -1,3 +1,4 @@
+// src/app/layouts/app/app.ts
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TopbarComponent } from '../../ui/topbar/topbar';
@@ -8,8 +9,6 @@ import { SidebarComponent } from '../../ui/sidebar/sidebar';
   standalone: true,
   imports: [RouterOutlet, TopbarComponent, SidebarComponent],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.css']
 })
-export class AppComponentLayout  {
-  userName = 'Nombre Bibliotecario';
-}
+export class AppComponentLayout {}

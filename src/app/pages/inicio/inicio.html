@@ -1,2 +1,157 @@
-<h2>Inicio</h2>
-<p>Bienvenido al Sistema de Biblioteca.</p>
+<!-- ESTUDIANTE -->
+<section *ngIf="esEstu" class="inicio">
+  <!-- Hero -->
+  <div class="hero" role="region" aria-label="Saludo">
+    <h1>Hola, {{ nombre }}</h1>
+    <p>¿Qué libro leerás hoy? Revisa lo más solicitado.</p>
+  </div>
+
+  <!-- Accesos rápidos -->
+  <div class="quick-grid">
+    <a class="qcard" [routerLink]="['/catalogo']">
+      <span class="material-symbols-rounded" aria-hidden="true">search</span>
+      <strong>Buscar catálogo</strong>
+      <small>Libros, recursos y más</small>
+    </a>
+    <a class="qcard" [routerLink]="['/prestamos']">
+      <span class="material-symbols-rounded" aria-hidden="true">assignment_turned_in</span>
+      <strong>Mis préstamos</strong>
+      <small>Revisa fechas y estados</small>
+    </a>
+    <a class="qcard" [routerLink]="['/reservas']">
+      <span class="material-symbols-rounded" aria-hidden="true">event_available</span>
+      <strong>Mis reservas</strong>
+      <small>Estado de tus solicitudes</small>
+    </a>
+    <a class="qcard" [routerLink]="['/multas']">
+      <span class="material-symbols-rounded" aria-hidden="true">payments</span>
+      <strong>Multas</strong>
+      <small>Pagos y pendientes</small>
+    </a>
+  </div>
+
+  <h2 class="section-title">Lo más buscado…</h2>
+
+  <!-- Carrusel de categorías -->
+  <div class="carousel">
+    <button class="nav prev" type="button" aria-label="Anterior" (click)="scroll('left')">
+      <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
+    </button>
+
+    <div class="track" #scroller>
+      <article class="cat-card" *ngFor="let c of categorias" tabindex="0">
+        <div class="img-ph">
+          <span class="material-symbols-rounded" aria-hidden="true">image</span>
+        </div>
+        <h3 class="cat-title">{{ c }}</h3>
+      </article>
+    </div>
+
+    <button class="nav next" type="button" aria-label="Siguiente" (click)="scroll('right')">
+      <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+    </button>
+  </div>
+</section>
+
+<!-- BIBLIOTECARIO -->
+<section *ngIf="esBiblio" class="inicio">
+  <div class="hero">
+    <h1>Hola, {{ nombre }}</h1>
+    <p>Panel de gestión bibliotecaria.</p>
+  </div>
+
+  <div class="stats">
+  <div class="stat stat--ok">
+    <span class="material-symbols-rounded">assignment</span>
+    <div><strong>24</strong><small>Préstamos activos</small></div>
+  </div>
+
+  <div class="stat stat--warn">
+    <span class="material-symbols-rounded">schedule</span>
+    <div><strong>5</strong><small>Retrasos hoy</small></div>
+  </div>
+
+  <div class="stat stat--danger">
+    <span class="material-symbols-rounded">event_note</span>
+    <div><strong>12</strong><small>Reservas pendientes</small></div>
+  </div>
+</div>
+
+
+  <div class="quick-grid">
+    <a class="qcard" [routerLink]="['/prestamos']">
+      <span class="material-symbols-rounded">library_add</span>
+      <strong>Registrar préstamo</strong>
+      <small>Asignar ejemplares</small>
+    </a>
+    <a class="qcard" [routerLink]="['/prestamos']">
+      <span class="material-symbols-rounded">how_to_reg</span>
+      <strong>Devoluciones</strong>
+      <small>Procesar retornos</small>
+    </a>
+    <a class="qcard" [routerLink]="['/reservas']">
+      <span class="material-symbols-rounded">event</span>
+      <strong>Reservas</strong>
+      <small>Aprobar o rechazar</small>
+    </a>
+    <a class="qcard" [routerLink]="['/catalogo']">
+      <span class="material-symbols-rounded">edit</span>
+      <strong>Catálogo</strong>
+      <small>Editar recursos</small>
+    </a>
+  </div>
+</section>
+
+<!-- ADMINISTRADOR -->
+<section *ngIf="esAdmin" class="inicio">
+  <div class="hero">
+    <h1>Hola, {{ nombre }}</h1>
+    <p>Centro de administración del sistema.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <span class="material-symbols-rounded">group</span>
+      <div><strong>312</strong><small>Usuarios activos</small></div>
+    </div>
+    <div class="stat">
+      <span class="material-symbols-rounded">inventory_2</span>
+      <div><strong>1,254</strong><small>Recursos</small></div>
+    </div>
+    <div class="stat">
+      <span class="material-symbols-rounded">insights</span>
+      <div><strong>+12%</strong><small>Uso mensual</small></div>
+    </div>
+  </div>
+
+  <div class="quick-grid">
+    <a class="qcard" [routerLink]="['/usuarios']">
+      <span class="material-symbols-rounded">manage_accounts</span>
+      <strong>Usuarios</strong>
+      <small>Roles y permisos</small>
+    </a>
+    <a class="qcard" [routerLink]="['/multas']">
+      <span class="material-symbols-rounded">tune</span>
+      <strong>Parámetros</strong>
+      <small>Multas y políticas</small>
+    </a>
+    <a class="qcard" [routerLink]="['/catalogo']">
+      <span class="material-symbols-rounded">add_circle</span>
+      <strong>Nuevo recurso</strong>
+      <small>Altas al catálogo</small>
+    </a>
+    <a class="qcard" [routerLink]="['/inicio']">
+      <span class="material-symbols-rounded">analytics</span>
+      <strong>Reportes</strong>
+      <small>Indicadores clave</small>
+    </a>
+  </div>
+</section>
+
+<!-- Fallback por si acaso -->
+<section *ngIf="!esEstu && !esBiblio && !esAdmin" class="inicio">
+  <div class="hero">
+    <h1>Hola, {{ nombre }}</h1>
+    <p>Bienvenido(a) a Biblioteca.</p>
+  </div>
+</section>
