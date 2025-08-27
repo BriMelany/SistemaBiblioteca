@@ -166,7 +166,7 @@
                             </td>
                             <td class="acciones">
                                 <button class="icon icon--view" title="Ver" (click)="verDetalle(d)">
-                                     <span class="material-symbols-rounded">visibility</span>
+                                    <span class="material-symbols-rounded">visibility</span>
                                 </button>
                             </td>
                         </tr>
@@ -189,17 +189,17 @@
 </section>
 
 @if (prestamoCancelarId) {
-  <div class="modal-backdrop" (click)="cerrarCancelar()"></div>
-  <div class="modal modal-cancelar card modal--small" (click)="$event.stopPropagation()">
-      <h3>Cancelar préstamo</h3>
-      <p>
-          ¿Seguro que deseas cancelar el préstamo <b>{{ 'RF' + (prestamoCancelarId | number:'4.0') }}</b>
-      </p>
-      <div class="modal-actions">
-          <button class="btn-red" (click)="confirmarCancelar()">Sí, cancelar</button>
-          <button class="btn-gray" (click)="cerrarCancelar()">Cerrar</button>
-      </div>
-  </div>
+<div class="modal-backdrop" (click)="cerrarCancelar()"></div>
+<div class="modal modal-cancelar card modal--small" (click)="$event.stopPropagation()">
+    <h3>Cancelar préstamo</h3>
+    <p>
+        ¿Seguro que deseas cancelar el préstamo <b>{{ 'RF' + (prestamoCancelarId | number:'4.0') }}</b>
+    </p>
+    <div class="modal-actions">
+        <button class="btn-red" (click)="confirmarCancelar()">Sí, cancelar</button>
+        <button class="btn-gray" (click)="cerrarCancelar()">Cerrar</button>
+    </div>
+</div>
 }
 
 
@@ -262,10 +262,9 @@
         Multa pendiente: <strong>S/. {{ seleccion.monto }}</strong>
         ({{ seleccion.estadoMulta || 'Pendiente' }})
     </div>
-    <div class="note">
+    <div class="note" *ngIf="!seleccion.devolucionReal">
         Retraso de {{ calcularRetraso(seleccion.fechaPrestamo, seleccion.devolucion) }} días en la devolución
         (vence: {{ seleccion.devolucion }})
-        Multa acumulada: <strong>S/. {{ seleccion.monto }}</strong>.
     </div>
     }
 </div>
