@@ -25,7 +25,7 @@ export const routes: Routes = [
       { path: 'inicio',    loadComponent: () => import('./pages/inicio/inicio').then(m => m.Inicio) },
       { path: 'catalogo',  loadComponent: () => import('./pages/catalogo/catalogo').then(m => m.Catalogo) },
       { path: 'reservas',  loadComponent: () => import('./pages/reservas/reservas').then(m => m.Reservas) },
-      { path: 'prestamos', loadComponent: () => import('./pages/prestamos/prestamos').then(m => m.Prestamos) },
+      { path: 'prestamos', loadComponent: () => import('./pages/prestamos/prestamo/prestamo').then(m => m.PrestamoComponent) },
       { path: 'multas', data: { roles: ['ADMINISTRADOR','BIBLIOTECARIO'] },loadComponent: () => import('./pages/multas/multas').then(m => m.Multas)},
       { path: 'usuarios', data: { roles: ['ADMINISTRADOR'] },  loadComponent: () => import('./pages/usuarios/usuarios').then(m => m.Usuarios),},
       { path: 'catalogo/acciones/editar-recurso', loadComponent: () =>import('./pages/catalogo/acciones/editar-recurso/editar-recurso').then(m => m.EditarRecurso)},

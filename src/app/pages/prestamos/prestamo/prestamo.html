@@ -1,0 +1,272 @@
+<section class="page">
+    <!-- Header -->
+    <div class="page_header">
+        <h2>Listado de Préstamos</h2>
+        @if (esBiblioAdmin) {
+        <button class="btn-primary" (click)="generarPrestamoConReserva()">
+            Generar Préstamo con Reserva
+        </button>
+        }
+    </div>
+
+    <!-- Card principal -->
+    <div class="card">
+        <!-- Filtros -->
+        <div class="filtros">
+            <div class="card">
+                <div class="fx__body">
+
+                    <!-- Fecha -->
+                    <div class="field small">
+                        <label class="field__label">Fecha:</label>
+                        <input class="field__input" type="date" [(ngModel)]="fechaFiltro" />
+                    </div>
+
+
+                    @if (esBiblioAdmin) {
+                    <div class="field small">
+                        <label class="field__label">Bibliotecario:</label>
+                        <select class="field__input" [(ngModel)]="bibliotecarioFiltro">
+                            <option value="">Todos</option>
+                            <option *ngFor="let b of bibliotecarios" [value]="b.nombreCompleto">
+                                {{ b.nombreCompleto }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Usuario -->
+                    <div class="field small">
+                        <label class="field__label">Usuario:</label>
+                        <input class="field__input" type="text" [(ngModel)]="usuarioFiltro"
+                            placeholder="Buscar usuario..." />
+                    </div>
+                    }
+
+                    <!-- Estado -->
+                    <div class="field small">
+                        <label class="field__label">Estado:</label>
+                        <select class="field__input" [(ngModel)]="estadoFiltro">
+                            <option value="">Todos</option>
+                            <option *ngFor="let e of estados" [value]="e">{{ e }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Botón de aplicar filtros -->
+                    <div class="field small" style="align-self: flex-end;">
+                        <button class="btn" (click)="aplicarFiltros()">Buscar</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido de resultados -->
+        <div class="resultados">
+            <!-- Tabla para ADMIN -->
+            @if (esBiblioAdmin) {
+            <div>
+                <div class="results__title">Resultados</div>
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Fecha préstamo</th>
+                            <th>Fecha límite</th>
+                            <th>Fecha devolución</th>
+                            <th>Usuario</th>
+                            <th>Bibliotecario</th>
+                            <th>Ejemplar</th>
+                            <th>Estado</th>
+                            <th>Reserva Asociada</th>
+                            <th class="center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let p of lista">
+                            <td>{{ 'RF' + (p.prestamoId | number:'4.0') }}</td>
+                            <td>{{ p.fechaPrestamo }}</td>
+                            <td>{{ p.devolucion }}</td>
+                            <td>{{ p.devolucionReal || '—' }}</td>
+                            <td>{{ p.usuario }}</td>
+                            <td>{{ p.bibliotecario }}</td>
+                            <td>{{ p.idEjemplar }}</td>
+                            <td>
+                                <span class="estado-prestamo" [ngClass]="{
+                                'estado-activo': p.estado === 'activo',
+                                'estado-devuelto': p.estado === 'devuelto',
+                                'estado-retrasado': p.estado === 'retrasado',
+                                'estado-perdido': p.estado === 'perdido'
+                                }">
+                                    {{ p.estado }}
+                                </span>
+                            </td>
+                            <td>{{ p.idReserva || '—' }}</td>
+                            <td class="acciones">
+                                <button class="icon icon--view" title="Abrir Cancelar" (click)="abrirCancelar(p)">
+                                    <span class="material-symbols-rounded">
+                                        cancel_presentation
+                                    </span>
+                                </button>
+                                <button class="icon icon--view" title="Registrar Devolucion"
+                                    (click)="registrarDevolucion(p)">
+                                    <span class="material-symbols-rounded">
+                                        cached
+                                    </span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            }
+
+            <!-- Tabla para USUARIO -->
+            @if (esUsuario) {
+            <div>
+                <div class="results__title">Mis Préstamos</div>
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Fecha préstamo</th>
+                            <th>Fecha límite</th>
+                            <th>Fecha devolución</th>
+                            <th>Bibliotecario</th>
+                            <th>Estado</th>
+                            <th>Reserva Asociada</th>
+                            <th>Multa</th>
+                            <th class="center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let d of lista">
+                            <td>{{ 'RF' + (d.prestamoId | number:'4.0') }}</td>
+                            <td>{{ d.fechaPrestamo }}</td>
+                            <td>{{ d.devolucion }}</td>
+                            <td>{{ d.devolucionReal || '—' }}</td>
+                            <td>{{ d.bibliotecarioNombre }}</td>
+                            <td>
+                                <span class="estado-prestamo" [ngClass]="{
+                                'estado-activo': d.estado === 'activo',
+                                'estado-devuelto': d.estado === 'devuelto',
+                                'estado-retrasado': d.estado === 'retrasado',
+                                'estado-perdido': d.estado === 'perdido'
+                                }">
+                                    {{ d.estado }}
+                                </span>
+                            </td>
+                            <td>{{ d.reservaId || '—' }}</td>
+                            <td>
+                                @if (d.monto) {
+                                <span class="pill pill--purple">
+                                    S/. {{ d.monto }} ({{ d.estadoMulta || 'Pendiente' }})
+                                </span>
+                                }
+                                @else { — }
+                            </td>
+                            <td class="acciones">
+                                <button class="icon icon--view" title="Ver" (click)="verDetalle(d)">
+                                     <span class="material-symbols-rounded">visibility</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            }
+
+            <!-- Paginación -->
+            <div class="pager">
+                <button class="pg-btn" (click)="prev()">«</button>
+                <button *ngFor="let pg of pages" class="pg-btn" [class.is-active]="pg === pageIndex"
+                    (click)="goToPage(pg)">
+                    {{ pg }}
+                </button>
+                <button class="pg-btn" (click)="next()">»</button>
+            </div>
+        </div> <!-- resultados -->
+    </div> <!-- card -->
+</section>
+
+@if (prestamoCancelarId) {
+  <div class="modal-backdrop" (click)="cerrarCancelar()"></div>
+  <div class="modal modal-cancelar card modal--small" (click)="$event.stopPropagation()">
+      <h3>Cancelar préstamo</h3>
+      <p>
+          ¿Seguro que deseas cancelar el préstamo <b>{{ 'RF' + (prestamoCancelarId | number:'4.0') }}</b>
+      </p>
+      <div class="modal-actions">
+          <button class="btn-red" (click)="confirmarCancelar()">Sí, cancelar</button>
+          <button class="btn-gray" (click)="cerrarCancelar()">Cerrar</button>
+      </div>
+  </div>
+}
+
+
+
+@if (seleccion) {
+<div class="modal-backdrop" (click)="cerrarDetalle()"></div>
+<div class="modal card" (click)="$event.stopPropagation()">
+    <button class="modal__close" (click)="cerrarDetalle()" aria-label="Cerrar">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <div class="detalle__hdr">
+        <h3 class="results__title">Código Ejemplar: {{ seleccion.idEjemplar }}</h3>
+    </div>
+
+    <div class="detalle">
+        <!-- Portada -->
+        <div class="det__left">
+            <div class="thumb">
+                <img [src]="seleccion.pathImagen || 'assets/cover-placeholder.png'" alt="Portada" loading="lazy" />
+            </div>
+        </div>
+
+        <!-- Información -->
+        <div class="det__right">
+            <h3 class="det__titulo">{{ seleccion.titulo }}</h3>
+            <p class="det__autor">{{ seleccion.autores }}</p>
+            <dl class="dl">
+                <div>
+                    <dt>ISBN:</dt>
+                    <dd>{{ seleccion.isbnIssn || '—' }}</dd>
+                </div>
+                <div>
+                    <dt>Tipo Recurso:</dt>
+                    <dd>{{ seleccion.tipoRecurso }}</dd>
+                </div>
+                <div>
+                    <dt>Género:</dt>
+                    <dd>{{ seleccion.genero }}</dd>
+                </div>
+                <div>
+                    <dt>Editorial:</dt>
+                    <dd>{{ seleccion.editorial }}</dd>
+                </div>
+                <div>
+                    <dt>Año:</dt>
+                    <dd>{{ seleccion.anoPublicacion }}</dd>
+                </div>
+                <div>
+                    <dt>Descripción:</dt>
+                    <dd>{{ seleccion.descripcion || '[Sin descripción]' }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    @if (seleccion.multaId) {
+    <div class="note note--warn">
+        <span class="material-symbols-rounded">info</span>
+        Multa pendiente: <strong>S/. {{ seleccion.monto }}</strong>
+        ({{ seleccion.estadoMulta || 'Pendiente' }})
+    </div>
+    <div class="note">
+        Retraso de {{ calcularRetraso(seleccion.fechaPrestamo, seleccion.devolucion) }} días en la devolución
+        (vence: {{ seleccion.devolucion }})
+        Multa acumulada: <strong>S/. {{ seleccion.monto }}</strong>.
+    </div>
+    }
+</div>
+}
