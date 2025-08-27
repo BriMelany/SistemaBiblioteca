@@ -3,7 +3,10 @@
   <hr class="sb__rule" />
 
   <nav class="sb__nav">
-    <a class="sb__link" routerLink="/inicio" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+    <a class="sb__link"
+       routerLink="/inicio"
+       routerLinkActive="is-active"
+       [routerLinkActiveOptions]="{ exact: true }">
       <span class="sb__icon" aria-hidden="true"><span class="material-symbols-rounded">home</span></span>
       <span class="sb__text">Inicio</span>
     </a>
@@ -13,7 +16,10 @@
       <span class="sb__text">Catálogo de Libros</span>
     </a>
 
-    <a class="sb__link" routerLink="/prestamos" routerLinkActive="is-active">
+    <!-- Si “Préstamo y devolución” es solo staff, descomenta el *ngIf de abajo -->
+    <a class="sb__link"
+       routerLink="/prestamos"
+       routerLinkActive="is-active">
       <span class="sb__icon" aria-hidden="true"><span class="material-symbols-rounded">autorenew</span></span>
       <span class="sb__text">Préstamo y devolución</span>
     </a>
@@ -23,18 +29,26 @@
       <span class="sb__text">Reservas</span>
     </a>
 
-    <a class="sb__link" routerLink="/multas" routerLinkActive="is-active">
+    <a class="sb__link"
+       routerLink="/multas"
+       routerLinkActive="is-active"
+       *ngIf="auth.hasRole('ADMINISTRADOR','BIBLIOTECARIO')">
       <span class="sb__icon" aria-hidden="true"><span class="material-symbols-rounded">receipt_long</span></span>
       <span class="sb__text">Multas</span>
     </a>
-    <a class="sb__link" routerLink="/usuarios" routerLinkActive="is-active">
+
+    <a class="sb__link"
+       routerLink="/usuarios"
+       routerLinkActive="is-active"
+       *ngIf="auth.hasRole('ADMINISTRADOR')">
       <span class="sb__icon" aria-hidden="true"><span class="material-symbols-rounded">manage_accounts</span></span>
       <span class="sb__text">Gestión Usuarios</span>
     </a>
   </nav>
 
   <div class="sb__spacer"></div>
-  <a class="sb__exit" routerLink="/login">
-    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:18px;vertical-align:-2px">logout</span> Salir
-  </a>
+  <button type="button" class="sb__exit" (click)="logout()">
+    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:18px;vertical-align:-2px">logout</span>
+    Salir
+  </button>
 </aside>

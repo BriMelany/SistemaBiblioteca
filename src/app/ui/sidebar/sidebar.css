@@ -96,7 +96,7 @@
 
 /* Pie */
 .sb__spacer{ flex:1; }
-.sb__exit{ align-self:center; margin-top:6px; text-decoration:none; color:var(--sb-icon); padding:6px 10px; border-radius:10px; }
+.sb__exit{ border: none;align-self:center; margin-top:6px; text-decoration:none;  background: var(--sb-active); color:var(--sb-active-text); padding:6px 10px; border-radius:10px; }
 
 /* Accesibilidad */
 .sb__link:focus-visible,.sb__exit:focus-visible{ outline:2px solid #7c83ff; outline-offset:2px; }

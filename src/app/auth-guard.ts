@@ -1,23 +1,30 @@
-
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from './core/auth/auth';
+import { ActivatedRouteSnapshot,CanActivateFn,Router,RouterStateSnapshot,UrlTree} from '@angular/router';
+import { AuthService, RolBD } from './core/auth/auth';
 
-export const authGuard: CanActivateFn = async (_r, s) => {
+// helper: toma el snapshot más profundo (ruta hija real a cargar)
+function getDeepest(s: ActivatedRouteSnapshot): ActivatedRouteSnapshot {
+  while (s.firstChild) s = s.firstChild;
+  return s;
+}
+export const authGuard: CanActivateFn = async (route, state): Promise<boolean | UrlTree> => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
   if (!auth.isLoggedIn) {
-    router.navigate(['/login'], { queryParams: { redirect: s.url } });
-    return false;
+    return router.createUrlTree(['/login'], { queryParams: { redirect: state.url } });
   }
 
-  try {
-    await auth.hydrateUser();      // ← pide /auth/me y deja todo en memoria
-    return true;
-  } catch {
-    auth.logout();
-    router.navigate(['/login'], { queryParams: { redirect: s.url } });
-    return false;
+  if (!auth.currentUser) {
+    try { await auth.hydrateUser(); }
+    catch { return router.createUrlTree(['/login'], { queryParams: { redirect: state.url } }); }
   }
+
+  const deepest = getDeepest(state.root);
+  const roles = (deepest.data?.['roles'] as (RolBD | string)[]) ?? [];
+
+  if (roles.length && !auth.hasRole(...roles)) {
+    return router.createUrlTree(['/forbidden']);
+  }
+  return true;
 };

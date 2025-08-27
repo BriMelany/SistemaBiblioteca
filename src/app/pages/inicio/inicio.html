@@ -39,11 +39,12 @@
     </button>
 
     <div class="track" #scroller>
-      <article class="cat-card" *ngFor="let c of categorias" tabindex="0">
+      <article class="cat-card" *ngFor="let c of categorias" tabindex="0" (click)="irACategoria(c)">
         <div class="img-ph">
-          <span class="material-symbols-rounded" aria-hidden="true">image</span>
+           <img [src]="c.img" [alt]="c.label" loading="lazy" decoding="async"
+              (error)="onImgError($event)">
         </div>
-        <h3 class="cat-title">{{ c }}</h3>
+        <h3 class="cat-title">{{ c.label }}</h3>
       </article>
     </div>
 

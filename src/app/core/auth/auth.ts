@@ -22,33 +22,25 @@ export class AuthService {
   get isLoggedIn() { return !!this.token; }
 
   login(usuario: string, password: string) {
-    return this.http.post<any>('/auth/login', { usuario, password }, { observe: 'response' }).pipe(
-      tap((resp: HttpResponse<any>) => {
-        // 1) guarda SOLO el token en sessionStorage
-        const raw = resp.headers.get('Authorization') ?? resp.headers.get('authorization') ?? '';
-        const token = raw.replace(/Bearer\s+/i, '').replace(/^"+|"+$/g, '').trim();
-        if (!token) throw { error: { codigo: 'TOKEN_NO_ENTREGADO' } };
-        sessionStorage.setItem(TOKEN_KEY, token);
+  return this.http.post<any>('/auth/login', { usuario, password }, { observe: 'response' }).pipe(
+    tap(async (resp: HttpResponse<any>) => {
+      const raw = resp.headers.get('Authorization') ?? resp.headers.get('authorization') ?? '';
+      const token = raw.replace(/Bearer\s+/i, '').replace(/^"+|"+$/g, '').trim();
+      if (!token) throw { error: { codigo: 'TOKEN_NO_ENTREGADO' } };
+      sessionStorage.setItem(TOKEN_KEY, token);
 
-        // 2) opcional: setear en memoria lo que venga en body (sin guardar en storage)
-        if (resp.body?.rol || resp.body?.nombreCompleto) {
-          this._user$.next({
-            id:        resp.body?.id,
-            usuario:   resp.body?.usuario,
-            nombreCompleto: resp.body?.nombreCompleto,
-            rol:       (resp.body?.rol ?? 'ESTUDIANTE') as RolBD,
-          });
-        }
-      }),
-      map(r => r.body)
-    );
-  }
+      //llama a hydrateUser inmediatamente después de loguear
+      await this.hydrateUser();
+    }),
+    map(r => r.body)
+  );
+}
 
   /** Rehidrata tras F5 pidiendo el perfil al backend; no guarda nada en storage */
   async hydrateUser(): Promise<void> {
     if (!this.token || this._user$.value?.nombreCompleto) return;
     const me = await firstValueFrom(this.http.get<SessionUser>(PROFILE_URL));
-    // 👇 solo en memoria
+    // solo en memoria
     this._user$.next({
       id: me.id,
       usuario: me.usuario,
