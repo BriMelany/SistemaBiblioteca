@@ -15,5 +15,5 @@ export interface CatalogoVista {
   ejemplares?: number;
   es_consulta_sala: boolean;
   portadaUrl?: string;
-  estado?: 'Activo' | 'En revision' | 'Retirado';
+  estado?: 'Activo' | 'En revision' | 'Retirado' | null;
 }

@@ -201,7 +201,7 @@
     <div class="detalle__hdr">
       @if (seleccion!.es_consulta_sala 
         || rol === 'Usuario' 
-        || (rol === 'Bibliotecario' || rol === 'Administrador') && seleccion!.estado === 'Activo') {
+        || (rol === 'Bibliotecario' || rol === 'Administrador')) {
       <span class="pill"
             [class.pill--purple]="seleccion!.es_consulta_sala"
             [class.pill--green]="!seleccion!.es_consulta_sala">
@@ -259,27 +259,14 @@
                 Solicitar reserva
               </button>
             }
-            @case ('prestamo') {
-              @if (seleccion!.estado === 'Activo') {
-            <div class="prestamo">
-              <span class="estado-prestamo">
-                {{ seleccion!.estado }}
-              </span>
-              <button class="btn-primary" (click)="realizarPrestamo(seleccion!)">
+            @case ('prestamo') {<button class="btn-primary" (click)="realizarPrestamo(seleccion!)">
                 Realizar préstamo
               </button>
-            </div>
-          } @else {
-            <!-- Mensaje cuando no está activo -->
-            <div class="note note--warn">
-              <span class="material-symbols-rounded">info</span>
-              Recurso no disponible para préstamo
-            </div>
           }
         }
             
        }
-     }
+     
     </div>          
     }
   </div>

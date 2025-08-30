@@ -107,6 +107,15 @@ input:focus, select:focus {
   pointer-events: none;
 }
 
+
+.btn.primary {
+  margin: 8px auto;
+  width: 90%; padding:.8rem 1rem; border:0; border-radius:.7rem;
+  background:#5a63f6; color:#fff; font-weight:700; cursor:pointer;
+}
+.btn.primary:disabled { opacity:.6; cursor:not-allowed; }
+.spinner { display:inline-block; }
+
 /* ====== Mensajes ====== */
 .error { color:#d33; font-size:.82rem; }
 .system-messages { margin:.25rem 0 .5rem; font-size:.82rem; }
@@ -127,6 +136,12 @@ input:focus, select:focus {
 .btn.primary:disabled { opacity:.6; cursor:not-allowed; }
 
 /* ====== Links ====== */
+.auth-links {
+  display: flex;
+  justify-content: center; /* centra horizontalmente */
+  margin-top: 16px;        /* opcional, para separar del formulario */
+}
+
 .links, .register {
   text-align:center;
   margin-top:.8rem;

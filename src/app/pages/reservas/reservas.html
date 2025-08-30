@@ -78,21 +78,23 @@
 
           <td class="center">
             <ng-container *ngIf="rol === 'Usuario'; else adminAcciones">
-              <button class="icon icon--badge" title="Cancelar libro" (click)="pedirCancelar(r)">
+              <button class="icon icon--badge" title="Cancelar libro" (click)="abrirAccion(r,'cancelar')">
                 <span class="material-symbols-rounded base">menu_book</span>
                 <span class="material-symbols-rounded badge">close</span>
               </button>
+              <!--
               <button class="icon icon--download" title="Descargar comprobante" (click)="descargar(r)">
                 <span class="material-symbols-rounded">download</span>
               </button>
+              -->
             </ng-container>
             <ng-template #adminAcciones>
-             <button class="icon icon--approve" title="Aprobar reserva" (click)="abrirConfirmacion(r)">
+             <button class="icon icon--approve" title="Aprobar reserva" (click)="abrirAccion(r,'aprobar')">
               <span class="material-symbols-rounded">check_circle</span>
             </button>
-              <button class="icon icon--download" title="Descargar comprobante" (click)="descargar(r)">
-                <span class="material-symbols-rounded">download</span>
-              </button>
+             <button class="icon icon--approve" title="Rechazar reserva" (click)="abrirAccion(r,'rechazar')">
+              <span class="material-symbols-rounded">cancel</span>
+            </button>
             </ng-template>
           </td>
         </tr>
@@ -125,69 +127,32 @@
     </div>
   </div>
 
-  <!-- MODAL: Confirmar cancelación -->
-  <div *ngIf="mostrarConfirmar && seleccion">
+  <!-- MODAL: Ver detalle (único) -->
+  <div *ngIf="seleccion && !mostrarAccion">
     <div class="modal-backdrop" (click)="cerrarTodo()"></div>
-
-    <div class="modal card modal--danger"
-         role="dialog" aria-modal="true"
-         aria-labelledby="modal-cancelar-head" aria-describedby="modal-cancelar-desc"
-         tabindex="0" (keydown.escape)="cerrarTodo()"
-         (click)="$event.stopPropagation()">
-
-      <div class="modal__head" id="modal-cancelar-head">Cancelar Reserva</div>
-
-      <div class="modal__body" id="modal-cancelar-desc">
-        <p>Se cancelará la reserva de:</p>
-        <p class="danger">
-          <strong>Recurso:</strong> {{ seleccion.tipoRecurso }} — “{{ seleccion.recurso }}”
-        </p>
-      </div>
-      
-      <div *ngIf="error" class="alert alert-error">
-        {{ error }}
-      </div>
-      <div *ngIf="success" class="alert alert-success">
-        Reserva cancelada correctamente.
-      </div>
-      <div class="actions">
-        <button class="btn-danger" (click)="cancelar()">Confirmar</button>
-        <button class="btn-ghost" (click)="cerrarTodo()">Regresar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: Detalle reserva -->
-  <div *ngIf="seleccion && !mostrarConfirmar">
-    <div class="modal-backdrop" (click)="cerrarTodo()"></div>
-
     <div class="modal card modal--compact" (click)="$event.stopPropagation()">
       <button class="modal__close" (click)="cerrarTodo()" aria-label="Cerrar">
         <span class="material-symbols-rounded">close</span>
       </button>
 
-       <div class="detalle det--compact">
-      <!-- Col izquierda: imagen -->
-      <div class="det__left">
-        <div class="thumb">
-          <img [src]="seleccion.portadaUrl || 'assets/cover-placeholder.png'" alt="Portada" loading="lazy">
-          <span *ngIf="!seleccion.portadaUrl" class="material-symbols-rounded placeholder">image</span>
-        </div>
-      </div>
-
       <div class="detalle det--compact">
+        <div class="det__left">
+          <div class="thumb">
+            <img [src]="seleccion.portadaUrl || 'assets/cover-placeholder.png'" alt="Portada" loading="lazy">
+            <span *ngIf="!seleccion.portadaUrl" class="material-symbols-rounded placeholder">image</span>
+          </div>
+        </div>
+
         <div class="det__right">
           <dl class="dl dl--tight">
-            <div><dt>Título:</dt>             <dd>{{ seleccion.recurso }}</dd></div>
-            <div><dt>Tipo recurso:</dt>       <dd>{{ seleccion.tipoRecurso }}</dd></div>
-            <div><dt>Código:</dt>             <dd>{{ codigo(seleccion.id) }}</dd></div>
-            <div><dt>Fecha reserva:</dt>      <dd>{{ seleccion.fechaReserva | date:'dd/MM/yyyy' }}</dd></div>
-            <div><dt>Fecha expiración:</dt>   <dd>{{ seleccion.fechaExpiracion | date:'dd/MM/yyyy' }}</dd></div>
-            <div><dt>Notificado:</dt>         <dd>{{ seleccion.notificado ? 'Sí' : 'No' }}</dd></div>
+            <div><dt>Título:</dt> <dd>{{ seleccion.recurso }}</dd></div>
+            <div><dt>Tipo recurso:</dt> <dd>{{ seleccion.tipoRecurso }}</dd></div>
+            <div><dt>Código:</dt> <dd>{{ codigo(seleccion.id) }}</dd></div>
+            <div><dt>Fecha reserva:</dt> <dd>{{ seleccion.fechaReserva | date:'dd/MM/yyyy' }}</dd></div>
+            <div><dt>Fecha expiración:</dt> <dd>{{ seleccion.fechaExpiracion | date:'dd/MM/yyyy' }}</dd></div>
+            <div><dt>Notificado:</dt> <dd>{{ seleccion.notificado ? 'Sí' : 'No' }}</dd></div>
             <div><dt>Fecha notificación:</dt> 
-              <dd>{{ (seleccion.notificado && seleccion.fechaNotificacion) 
-                      ? (seleccion.fechaNotificacion | date:'dd/MM/yyyy') 
-                      : '—' }}</dd>
+              <dd>{{ (seleccion.notificado && seleccion.fechaNotificacion) ? (seleccion.fechaNotificacion | date:'dd/MM/yyyy') : '—' }}</dd>
             </div>
           </dl>
         </div>
@@ -195,23 +160,30 @@
     </div>
   </div>
 
-<!-- MODAL: Confirmación de aprobación -->
-  <div *ngIf="mostrarConfirmar1 && seleccion1">
-  <div class="modal-backdrop" (click)="cerrarTodo()"></div>
-
-  <div class="modal card modal--success" (click)="$event.stopPropagation()">
-    <div class="modal__head">Aprobar Reserva</div>
-
-    <div class="modal__body">
-      <p>Se aprobará la reserva de:</p>
-      <p class="success">
-        <strong>Recurso:</strong> {{ seleccion1.tipoRecurso }} — “{{ seleccion1.recurso }}”
-      </p>
-    </div>
-
-    <div class="actions">
-      <button class="btn-primary" (click)="confirmarAprobacion()">Confirmar</button>
-      <button class="btn-ghost" (click)="cerrarTodo()">Regresar</button>
+  <!-- MODAL: Acciones unificado (Cancelar, Aprobar, Rechazar) -->
+  <div *ngIf="mostrarAccion && seleccionAccion">
+    <div class="modal-backdrop" (click)="cerrarTodo()"></div>
+    <div class="modal card"
+         [ngClass]="{
+           'modal--danger': tipoAccion==='cancelar'||tipoAccion==='rechazar',
+           'modal--success': tipoAccion==='aprobar'
+         }"
+         (click)="$event.stopPropagation()">
+      <div class="modal__head">
+        {{ tipoAccion==='cancelar'?'Cancelar Reserva':tipoAccion==='aprobar'?'Aprobar Reserva':'Rechazar Reserva' }}
+      </div>
+      <div class="modal__body">
+        <p>Se {{ tipoAccion }} la reserva de:</p>
+        <p [ngClass]="{'danger': tipoAccion==='cancelar'||tipoAccion==='rechazar','success':tipoAccion==='aprobar'}">
+          <strong>Recurso:</strong> {{ seleccionAccion.tipoRecurso }} — "{{ seleccionAccion.recurso }}"
+        </p>
+      </div>
+      <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+      <div *ngIf="success" class="alert alert-success">Acción realizada correctamente.</div>
+      <div class="actions">
+        <button class="btn-success" (click)="ejecutarAccion()">Confirmar</button>
+        <button class="btn-ghost" (click)="cerrarTodo()">Regresar</button>
+      </div>
     </div>
   </div>
-</div>
+</section>

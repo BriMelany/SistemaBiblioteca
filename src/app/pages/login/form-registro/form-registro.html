@@ -72,16 +72,11 @@
           </label>
         </div>
 
-        <div class="actions">
-          <button class="btn-primary" type="submit" [disabled]="fg.invalid || cargando">
-            Registrarse
-          </button>
-        </div>
-
-        <p class="note">
-          En la página considerar profesor y estudiante; si es administrador, considerar 3 opciones.
-        </p>
-
+       <!-- Botón de registro -->
+      <button class="btn primary" type="submit" [disabled]="fg.invalid || cargando">
+        <span *ngIf="!cargando">Registrar</span>
+        <span *ngIf="cargando" class="spinner" aria-live="polite">Procesando…</span>
+      </button>
         <div class="auth-links">
           <a [routerLink]="['/login']">¿Ya tienes cuenta? Inicia sesión</a>
         </div>

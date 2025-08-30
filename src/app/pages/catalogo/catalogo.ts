@@ -83,7 +83,11 @@ ngOnInit() {
   }
 
   // ================== ACCIONES ==================
-  verDetalle(r: Recurso) { this.seleccion = r; }
+verDetalle(r: Recurso) {
+  this.seleccion = r;
+  console.log('Objeto completo:', this.seleccion);
+  console.log('Fecha de ingreso:', this.seleccion?.fecha_ingreso);
+}
 
   editarRecurso(r: Recurso) {
     this.router.navigate(['catalogo/acciones/editar-recurso'], { state: { recurso: r } });
