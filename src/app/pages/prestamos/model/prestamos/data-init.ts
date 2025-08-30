@@ -1,5 +1,5 @@
 
-import { Bibliotecario } from '../model/bibliotecarios';
+import { Bibliotecario } from './bibliotecarios';
 
 export interface DataInit {
   bibliotecarios: Bibliotecario[];

@@ -1,1 +1,161 @@
-<p>generar-prestamo-conreserva works!</p>
+<div class="page">
+    <h2>Generar Préstamo</h2>
+
+    <div *ngIf="mensaje" [ngClass]="{'alert-success': !esError, 'alert-error': esError}" class="alert-box">
+        {{ mensaje }}
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progress-bar">
+        <div [class.active]="currentStep === 1">Paso 1: Reserva y Préstamo</div>
+        <div [class.active]="currentStep === 2">Paso 2: Usuario y Ejemplar</div>
+    </div>
+
+    <!-- Paso 1 -->
+    <div *ngIf="currentStep === 1" class="rs-wrap">
+
+        <!-- Datos de la Reserva -->
+        <div class="rs-title">Datos de la Reserva:</div>
+        <div class="rs-grid">
+            <div class="rs-line">
+                <label class="rs-label">Código:</label>
+                <input type="text" [(ngModel)]="reservaId" placeholder="Código de Reserva">
+            </div>
+            <div class="rs-line">
+                <button class="btn btn-primary" (click)="BuscarReserva()">Buscar Reserva</button>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Tipo de Recurso:</label>
+                <input type="text" [value]="prestamoRecurso?.tipoRecurso" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Título de Recurso:</label>
+                <input type="text" [value]="prestamoRecurso?.tituloRecurso" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Fecha de Reserva:</label>
+                <input type="text" [value]="reserva?.fechaReserva" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Estado:</label>
+                <input type="text" [value]="reserva?.estado" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Consulta en sala:</label>
+                <input type="checkbox" [checked]="reserva?.esConsultaSala" disabled>
+            </div>
+        </div>
+
+        <!-- Datos del Préstamo -->
+        <div class="rs-title">Datos del Préstamo:</div>
+        <div class="rs-grid">
+            <div class="rs-line">
+                <label class="rs-label">Fecha de Préstamo:</label>
+                <input type="text" [value]="prestamoRecurso?.fechaActual" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Fecha Límite:</label>
+                <input type="text" [(ngModel)]="devolucion" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Estado:</label>
+                <div class="select-wrap">
+                    <span class="estado-prestamo estado-activo">Activo</span>
+                </div>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Fecha de Devolución:</label>
+                <input type="text" value="" readonly placeholder="----------">
+            </div>
+        </div>
+
+        <div class="actions-center">
+            <button class="btn btn-primary" (click)="goNext()">Siguiente</button>
+        </div>
+    </div>
+
+    <!-- Paso 2 -->
+    <div *ngIf="currentStep === 2" class="rs-wrap">
+
+        <!-- Datos del Usuario -->
+        <div class="rs-title">Datos del Usuario:</div>
+        <div class="rs-grid">
+            <div class="rs-line">
+                <label class="rs-label">Nro Documento:</label>
+                <input type="text" [value]="reserva?.usuarioDocumento" placeholder="Número de documento">
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Nombre:</label>
+                <input type="text" [value]="reserva?.usuarioNombre" readonly placeholder="Nombre del Usuario">
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Apellidos:</label>
+                <input type="text" [value]="reserva?.usuarioApellido" readonly placeholder="Apellidos del Usuario">
+            </div>
+        </div>
+
+        <!-- Datos del Ejemplar -->
+        <div class="rs-title"
+            style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+            <span>Datos del Ejemplar:</span>
+            <button class="btn btn-primary" (click)="abrirModal(recursoId)">Buscar ubicaciones</button>
+        </div>
+        <div class="rs-grid">
+            <div class="rs-line">
+                <label class="rs-label">Código de Barras:</label>
+                <input type="text" [(ngModel)]="codigoBarras" placeholder="Código Único">
+            </div>
+            <div class="rs-line">
+                <button class="btn btn-primary" (click)="buscarPorCodigo()">Buscar Código</button>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Estado Físico:</label>
+                <input type="text" [value]="ejemplar?.estadoFisico || ''" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Ubicación:</label>
+                <input type="text" [value]="ejemplar?.ubicacionNombre" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Disponible para Préstamo:</label>
+                <input type="checkbox" [checked]="ejemplar?.disponible" disabled>
+            </div>
+        </div>
+
+        <div class="actions-center">
+            <button class="btn btn-gray" (click)="goPrev()">Anterior</button>
+             <button class="btn btn-primary" (click)="generarPrestamo()" [disabled]="isGeneroPrestamo">
+                {{ isGeneroPrestamo ? 'Préstamo generado' : 'Registrar Préstamo' }}
+            </button>
+            <button class="btn btn-secondary" (click)="Volver()">Volver</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" [class.show]="mostrarModal">
+    <div class="modal-content wide">
+        <h3>Ubicaciones disponibles</h3>
+        <table class="authors-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Estado</th>
+                    <th>Ubicación</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let ubic of ejemplares">
+                    <td>{{ ubic.codigoBarras }}</td>
+                    <td>{{ ubic.estadoFisico }}</td>
+                    <td>{{ ubic.ubicacionNombre }}</td>
+                    <td>{{ ubic.observaciones }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="modal-actions">
+            <button class="btn btn-gray" (click)="closeModal()">Cerrar</button>
+        </div>
+    </div>
+</div>

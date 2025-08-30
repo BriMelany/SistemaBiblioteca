@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { PrestamoService } from '../prestamo-service';
-import { PrestamoModel } from '../../model/prestamo-model';
-import { PrestamoDetalle } from '../../model/prestamo-detalle';
+import { PrestamoModel } from '../model/prestamos/prestamo-model';
+import { PrestamoDetalle } from '../model/prestamos/prestamo-detalle';
 import { AuthService } from '../../../core/auth/auth';
 import { Router } from '@angular/router';
-import { Bibliotecario } from '../../model/bibliotecarios';
+import { Bibliotecario } from '../model/prestamos/bibliotecarios';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -27,7 +27,7 @@ esUsuario: boolean = false;
 bibliotecarios: Bibliotecario[] = [];
 estados: string[] = [];
 
-// Filtros (4 en la parte superior)
+// Filtros 
 usuarioFiltro: string = '';
 bibliotecarioFiltro: string = '';
 estadoFiltro: string = '';
@@ -53,7 +53,7 @@ ngOnInit(): void {
   this.prestamoService.listarBibliotecarios()
     .subscribe(b => this.bibliotecarios = b);
 
-  this.prestamoService.listarEstados()
+  this.prestamoService.listarEstadosLibros()
     .subscribe(e => this.estados = e);
 
   const rol = this.auth.currentUser?.rol;
@@ -162,11 +162,10 @@ limpiarFiltros() {
   this.ngOnInit();
 }
 
-generarPrestamoConReserva(prestamo?: PrestamoModel) {
+generarPrestamoConReserva() {
   if (!this.esBiblioAdmin) return;
   this.router.navigate(
-    ['prestamos/generar-prestamo-con-reserva'],
-    { state: { prestamo } }
+    ['prestamos/generar-prestamo-conreserva']
   );
 }
 
@@ -195,7 +194,8 @@ confirmarCancelar() {
 }
 
 registrarDevolucion(prestamo: PrestamoModel) {
-
+  sessionStorage.setItem('prestamo', JSON.stringify(prestamo));
+  this.router.navigate(['prestamos/registrar-devolucion']);
 }
 
 calcularRetraso(fechaPrestamo: string | Date, fechaDevolucion: string | Date): number {
@@ -206,9 +206,5 @@ calcularRetraso(fechaPrestamo: string | Date, fechaDevolucion: string | Date): n
   const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24)); 
   return diffDias;
 }
-
-
-
-
 
 }

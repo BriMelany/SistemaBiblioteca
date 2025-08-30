@@ -1,1 +1,147 @@
-<p>registrar-devolucion works!</p>
+<div class="page">
+    <h2>Registrar Devolución</h2>
+
+    <div *ngIf="mensaje" [ngClass]="{'alert-success': !esError, 'alert-error': esError}" class="alert-box">
+        {{ mensaje }}
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progress-bar">
+        <div *ngIf="!reserva" [class.active]="currentStep === 1">
+            Paso 1: Préstamo y Usuario
+        </div>
+
+        <div *ngIf="reserva" [class.active]="currentStep === 1">
+            Paso 1: Préstamo - Reserva - Usuario
+        </div>
+
+        <div [class.active]="currentStep === 2">
+            Paso 2: Ejemplar
+        </div>
+    </div>
+
+    <!-- Paso 1 -->
+    <div *ngIf="currentStep === 1" class="rs-wrap">
+
+        <!-- Datos del Préstamo -->
+        <div class="rs-title">Datos del Préstamo:</div>
+        <div class="rs-grid">
+            <div class="rs-line">
+                <label class="rs-label">Fecha de Préstamo:</label>
+                <input type="text" [value]="prestamo?.fechaPrestamo" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Fecha Límite:</label>
+                <input type="text" [value]="prestamo?.devolucion" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Estado:</label>
+                <div class="select-wrap">
+                    <span class="estado-prestamo estado-devuelto">Devuelto</span>
+                </div>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Fecha de Devolución:</label>
+                <input type="text" [value]="fechaActual" readonly>
+            </div>
+        </div>
+
+
+        <!-- SOLO SI EXISTE RESERVA -->
+        <div *ngIf="reserva">
+            <div class="rs-title">Datos de la Reserva:</div>
+            <div class="rs-grid">
+                <div class="rs-line">
+                    <label class="rs-label">Código:</label>
+                    <input type="text" [value]="reserva.reservaId" readonly>
+                </div>
+                <div class="rs-line">
+                    <label class="rs-label">Tipo de Recurso:</label>
+                    <input type="text" [value]="reserva.tipoRecurso" readonly>
+                </div>
+                <div class="rs-line">
+                    <label class="rs-label">Título de Recurso:</label>
+                    <input type="text" [value]="reserva.tituloRecurso" readonly>
+                </div>
+                <div class="rs-line">
+                    <label class="rs-label">Fecha de Reserva:</label>
+                    <input type="text" [value]="reserva.fechaReserva" readonly>
+                </div>
+                <div class="rs-line">
+                    <label class="rs-label">Estado:</label>
+                    <input type="text" [value]="reserva.estado" readonly>
+                </div>
+                <div class="rs-line">
+                    <label class="rs-label">Consulta en sala:</label>
+                    <input type="checkbox" [checked]="reserva.esConsultaSala" disabled>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuario (muestra uno u otro según exista reserva) -->
+        <div class="rs-title">Datos del Usuario:</div>
+        <div class="rs-grid">
+            <ng-container *ngIf="reserva; else usuarioPrestamo">
+                <div class="rs-line">
+                    <label class="rs-label">Nro Documento:</label>
+                    <input type="text" [value]="reserva.usuarioDocumento" readonly>
+                </div>
+                <div class="rs-line">
+                    <label class="rs-label">Nombre:</label>
+                    <input type="text" [value]="reserva.usuarioNombre" readonly>
+                </div>
+                <div class="rs-line">
+                    <label class="rs-label">Apellidos:</label>
+                    <input type="text" [value]="reserva.usuarioApellido" readonly>
+                </div>
+            </ng-container>
+
+            <ng-template #usuarioPrestamo>
+                <div class="rs-line">
+                    <label class="rs-label">Usuario:</label>
+                    <input type="text" [value]="prestamo?.usuario" readonly>
+                </div>
+            </ng-template>
+        </div>
+
+        <div class="actions-center">
+            <button class="btn btn-primary" (click)="goNext()">Siguiente</button>
+        </div>
+
+    </div>
+
+    <!-- Paso 2 -->
+    <div *ngIf="currentStep === 2" class="rs-wrap">
+        <!-- Datos del Ejemplar -->
+        <div class="rs-title"
+            style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+            <span>Datos del Ejemplar:</span>
+        </div>
+        <div class="rs-grid">
+            <div class="rs-line">
+                <label class="rs-label">Código de Barras:</label>
+                <input type="text" [value]="ejemplar?.codigoBarras" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Estado Físico:</label>
+                <input type="text" [value]="ejemplar?.estadoFisico" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Ubicación:</label>
+                <input type="text" [value]="ejemplar?.ubicacionNombre" readonly>
+            </div>
+            <div class="rs-line">
+                <label class="rs-label">Disponible para Préstamo:</label>
+                <input type="checkbox" [checked]="ejemplar?.disponible" disabled>
+            </div>
+        </div>
+
+        <div class="actions-center">
+            <button class="btn btn-gray" (click)="goPrev()">Anterior</button>
+            <button class="btn btn-primary" (click)="RegistrarDevolucion()" [disabled]="isDevolucionRegistrada">
+                {{ isDevolucionRegistrada ? 'Devolución registrada' : 'Registrar Devolución' }}
+            </button>
+            <button class="btn btn-secondary" (click)="Volver()">Volver</button>
+        </div>
+    </div>
+</div>

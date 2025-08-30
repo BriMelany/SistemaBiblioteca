@@ -55,13 +55,21 @@
   display:flex; justify-content:space-between; align-items:center; padding:10px 12px;
   background:#f2f4ff; color:#5a62c4; font-weight:700; cursor:pointer;
 }
-.fx__body{ padding:10px 12px; display:flex; flex-direction:row; gap:6px; }
-.fx__row{ display:flex; gap:10px; }
+.fx__body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  
+}
+
+
+.fx__row{ display:flex; gap:5px; }
 .chk{ display:flex; align-items:center; gap:8px; color:#5a62c4; }
-.field.small{ width:50%; }
+.field_small{ width: 20%; }
 .field__label{ font-size:12px; color:#7b8190; }
 .field__input{
-  width:100%; padding:8px 10px; border:1px solid #e6e8ff; border-radius:10px;
+  width:90%; padding:8px 10px; border:1px solid #e6e8ff; border-radius:10px;
 }
 .fx__footer{ padding:8px 0 0; display:flex; justify-content:flex-end; }
 .btn-ghost{
@@ -364,6 +372,15 @@
 }
 .btn-gray:hover {
   background: #ebeefc;
+}
+
+button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5; 
+}
+
+.btn-disabled {
+  filter: grayscale(60%);
 }
 
 @keyframes fadeInScale {

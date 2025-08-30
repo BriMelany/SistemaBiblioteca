@@ -17,14 +17,14 @@
                 <div class="fx__body">
 
                     <!-- Fecha -->
-                    <div class="field small">
+                    <div class="field_small">
                         <label class="field__label">Fecha:</label>
                         <input class="field__input" type="date" [(ngModel)]="fechaFiltro" />
                     </div>
 
 
                     @if (esBiblioAdmin) {
-                    <div class="field small">
+                    <div class="field_small">
                         <label class="field__label">Bibliotecario:</label>
                         <select class="field__input" [(ngModel)]="bibliotecarioFiltro">
                             <option value="">Todos</option>
@@ -35,7 +35,7 @@
                     </div>
 
                     <!-- Usuario -->
-                    <div class="field small">
+                    <div class="field_small">
                         <label class="field__label">Usuario:</label>
                         <input class="field__input" type="text" [(ngModel)]="usuarioFiltro"
                             placeholder="Buscar usuario..." />
@@ -43,7 +43,7 @@
                     }
 
                     <!-- Estado -->
-                    <div class="field small">
+                    <div class="field_small">
                         <label class="field__label">Estado:</label>
                         <select class="field__input" [(ngModel)]="estadoFiltro">
                             <option value="">Todos</option>
@@ -83,13 +83,13 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let p of lista">
-                            <td>{{ 'RF' + (p.prestamoId | number:'4.0') }}</td>
+                            <td>{{ 'RF' + (p.prestamoId.toString().padStart(4, '0')) }}</td>
                             <td>{{ p.fechaPrestamo }}</td>
                             <td>{{ p.devolucion }}</td>
                             <td>{{ p.devolucionReal || '—' }}</td>
                             <td>{{ p.usuario }}</td>
                             <td>{{ p.bibliotecario }}</td>
-                            <td>{{ p.idEjemplar }}</td>
+                            <td  class="center">{{ p.idEjemplar }}</td>
                             <td>
                                 <span class="estado-prestamo" [ngClass]="{
                                 'estado-activo': p.estado === 'activo',
@@ -100,18 +100,12 @@
                                     {{ p.estado }}
                                 </span>
                             </td>
-                            <td>{{ p.idReserva || '—' }}</td>
+                            <td  class="center">{{ p.idReserva || '—' }}</td>
                             <td class="acciones">
-                                <button class="icon icon--view" title="Abrir Cancelar" (click)="abrirCancelar(p)">
-                                    <span class="material-symbols-rounded">
-                                        cancel_presentation
-                                    </span>
-                                </button>
-                                <button class="icon icon--view" title="Registrar Devolucion"
-                                    (click)="registrarDevolucion(p)">
-                                    <span class="material-symbols-rounded">
-                                        cached
-                                    </span>
+                                <button class="icon icon--view" title="Registrar Devolución"
+                                    (click)="registrarDevolucion(p)" [disabled]="p.estado === 'devuelto'"
+                                    [ngClass]="{ 'btn-disabled': p.estado === 'devuelto' }">
+                                    <span class="material-symbols-rounded"> cached </span>
                                 </button>
                             </td>
                         </tr>
@@ -140,7 +134,7 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let d of lista">
-                            <td>{{ 'RF' + (d.prestamoId | number:'4.0') }}</td>
+                            <td>{{ 'RF' + (d.prestamoId.toString().padStart(4, '0')) }}</td>
                             <td>{{ d.fechaPrestamo }}</td>
                             <td>{{ d.devolucion }}</td>
                             <td>{{ d.devolucionReal || '—' }}</td>
@@ -155,7 +149,7 @@
                                     {{ d.estado }}
                                 </span>
                             </td>
-                            <td>{{ d.reservaId || '—' }}</td>
+                            <td class="center">{{ d.reservaId || '—' }}</td>
                             <td>
                                 @if (d.monto) {
                                 <span class="pill pill--purple">
@@ -193,7 +187,7 @@
 <div class="modal modal-cancelar card modal--small" (click)="$event.stopPropagation()">
     <h3>Cancelar préstamo</h3>
     <p>
-        ¿Seguro que deseas cancelar el préstamo <b>{{ 'RF' + (prestamoCancelarId | number:'4.0') }}</b>
+        ¿Seguro que deseas cancelar el préstamo <b>{{ 'RF' + (prestamoCancelarId.toString().padStart(4, '0')) }}</b>
     </p>
     <div class="modal-actions">
         <button class="btn-red" (click)="confirmarCancelar()">Sí, cancelar</button>
