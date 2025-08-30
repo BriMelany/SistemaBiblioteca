@@ -1,0 +1,91 @@
+<div class="login-page">
+  <!-- Panel izquierdo -->
+  <section class="brand-panel" aria-hidden="true">
+    <div class="brand-card">
+      <!-- pon la imagen como quieras (img o background) -->
+
+    </div>
+  </section>
+
+  <!-- Panel derecho (REGISTRO) -->
+  <section class="form-panel">
+    <h1 class="title">Registro</h1>
+    <div class="card">
+    
+      <!-- Reactive Form -->
+      <form [formGroup]="fg" (ngSubmit)="submit()" novalidate>
+        <div class="grid">
+          <label>
+            <span>Nombre:</span>
+            <input formControlName="nombres" />
+          </label>
+
+          <label>
+            <span>Apellidos:</span>
+            <input formControlName="apellidos" />
+          </label>
+
+          <label>
+            <span>Tipo Documento:</span>
+            <select formControlName="tipoDocumento">
+              <option *ngFor="let t of tiposDocumento" [value]="t">{{ t }}</option>
+            </select>
+            <span class="material-symbols-rounded suffix">expand_more</span>
+          </label>
+
+          <label>
+            <span>N° Documento:</span>
+            <input formControlName="numeroDocumento" />
+          </label>
+
+          <label>
+            <span>Rol:</span>
+            <select formControlName="rol">
+              <option *ngFor="let r of roles" [value]="r">{{ r | titlecase }}</option>
+            </select>
+            <span class="material-symbols-rounded suffix">expand_more</span>
+          </label>
+
+          <label>
+            <span>Dirección:</span>
+            <input formControlName="direccion" />
+          </label>
+
+          <label>
+            <span>Teléfono Móvil:</span>
+            <input formControlName="telefono" />
+          </label>
+
+          <label>
+            <span>Correo electrónico:</span>
+            <input formControlName="correo" type="email" />
+          </label>
+
+          <label>
+            <span>Usuario:</span>
+            <input formControlName="usuario" autocomplete="username" />
+          </label>
+
+          <label>
+            <span>Contraseña:</span>
+            <input formControlName="password" type="password" autocomplete="new-password" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit" [disabled]="fg.invalid || cargando">
+            Registrarse
+          </button>
+        </div>
+
+        <p class="note">
+          En la página considerar profesor y estudiante; si es administrador, considerar 3 opciones.
+        </p>
+
+        <div class="auth-links">
+          <a [routerLink]="['/login']">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>

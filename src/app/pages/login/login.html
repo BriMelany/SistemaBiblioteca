@@ -2,17 +2,10 @@
 <div class="login-page">
   <!-- Panel izquierdo (ilustración / logo) -->
   <section class="brand-panel" aria-hidden="true">
-    <div class="brand-card">
-      <!-- Coloca aquí tu logo o imagen -->
-      <div class="img-placeholder">
-        <svg viewBox="0 0 64 64" role="img" aria-label="Ilustración">
-          <rect x="2" y="10" width="60" height="44" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
-          <circle cx="46" cy="23" r="3" fill="currentColor"/>
-          <polyline points="10,44 26,26 36,38 42,32 54,44" fill="none" stroke="currentColor" stroke-width="2"/>
-        </svg>
-      </div>
-    </div>
-  </section>
+  <div class="brand-card">
+
+  </div>
+</section>
 
   <!-- Panel derecho (formulario) -->
   <section class="form-panel">
@@ -85,14 +78,14 @@
 
         <!-- Acciones secundarias -->
         <div class="links">
-          <a [routerLink]="['/auth/change-password']">Cambiar tu contraseña</a>
+          <a [routerLink]="['/login','recuperar']">Cambiar tu contraseña?</a>
         </div>
       </form>
     </div>
 
     <p class="register">
       ¿No tienes una cuenta?
-      <a [routerLink]="['/auth/register']">Registrate</a>
+     <a [routerLink]="['/login','registro']">Regístrate</a>
     </p>
   </section>
 </div>

@@ -1,7 +1,10 @@
 // src/app/core/auth/auth.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { BehaviorSubject, map, tap, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, map, tap, firstValueFrom , of} from 'rxjs';
+import { HttpHeaders } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+
 
 export type RolBD = 'ADMINISTRADOR' | 'PROFESOR' | 'ESTUDIANTE' | 'BIBLIOTECARIO';
 export interface SessionUser { id?: number | string; usuario?: string; nombreCompleto?: string; rol: RolBD; }
@@ -12,7 +15,6 @@ const PROFILE_URL = '/auth/me';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-
   private _user$ = new BehaviorSubject<SessionUser | null>(null);
   readonly user$ = this._user$.asObservable();
 
@@ -35,12 +37,9 @@ export class AuthService {
     map(r => r.body)
   );
 }
-
-  /** Rehidrata tras F5 pidiendo el perfil al backend; no guarda nada en storage */
   async hydrateUser(): Promise<void> {
     if (!this.token || this._user$.value?.nombreCompleto) return;
     const me = await firstValueFrom(this.http.get<SessionUser>(PROFILE_URL));
-    // solo en memoria
     this._user$.next({
       id: me.id,
       usuario: me.usuario,
@@ -49,10 +48,20 @@ export class AuthService {
     });
   }
 
-  logout() {
-    sessionStorage.removeItem(TOKEN_KEY);
-    this._user$.next(null);
-  }
+logout(): void {
+  const token = this.token;
+  sessionStorage.removeItem(TOKEN_KEY);
+  this._user$.next(null);
+  sessionStorage.removeItem('reserva_edit');
+  if (!token) return;
+  this.http.post('/auth/logout', {}, {
+    headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
+  })
+  .pipe(
+    catchError(() => of(null))
+  )
+  .subscribe();
+}
 
   hasRole(...roles: (RolBD | string)[]) {
     const mine = (this.role as string).toUpperCase();

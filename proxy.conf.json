@@ -1,4 +1,6 @@
 {
   "/auth":{"target": "http://localhost:8080","secure": false,"changeOrigin": true,"logLevel": "debug"},
-  "/prestamos": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" }
+  "/prestamos": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/reservas": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/recursos": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" }
 }

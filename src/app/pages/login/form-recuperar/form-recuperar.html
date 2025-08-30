@@ -1,0 +1,152 @@
+<div class="login-page">
+
+  <section class="brand-panel" aria-hidden="true">
+    <div class="brand-card"></div>
+  </section>
+
+  <section class="form-panel">
+    <h1 class="title">Cambiar tu contraseña</h1>
+
+<div class="flash flash--ok" *ngIf="success" role="alert" aria-live="assertive">
+  <span class="material-symbols-rounded">check_circle</span>
+  <strong>Listo:</strong> Tu contraseña se cambió correctamente.
+  <button type="button" class="flash__close" (click)="success=false" aria-label="Cerrar">×</button>
+</div>
+
+    <div class="card">
+      <div class="avatar">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="24" r="12"></circle>
+          <path d="M12 56c0-11 9-20 20-20s20 9 20 20" />
+        </svg>
+      </div>
+
+      <form [formGroup]="fg" (ngSubmit)="onSubmit()" novalidate>
+        <div class="field" *ngIf="!ocultarUsuario">
+          <label for="usuario">Usuario:</label>
+          <input
+            id="usuario"
+            type="text"
+            placeholder="Ingresa tu usuario"
+            formControlName="usuario"
+            autocomplete="username"
+            [class.is-invalid]="fg.get('usuario')?.touched && fg.get('usuario')?.invalid"
+          />
+          <small class="error" *ngIf="fg.get('usuario')?.touched && fg.get('usuario')?.hasError('required')">
+            El usuario es obligatorio.
+          </small>
+        </div>
+
+        <!-- Contraseña actual -->
+        <div class="field">
+          <label for="oldpwd">Contraseña actual:</label>
+          <div class="password-wrap">
+            <input
+              id="oldpwd"
+              [type]="showNew ? 'text' : 'password'"
+              placeholder="••••••••"
+              formControlName="passwordActual"
+              autocomplete="current-password"
+              [class.is-invalid]="fg.get('passwordActual')?.touched && fg.get('passwordActual')?.invalid"
+            />
+            <button type="button"
+                    class="toggle-eye"
+                    (click)="showNew = !showNew"
+                    [attr.aria-pressed]="showNew"
+                    aria-label="Mostrar u ocultar contraseña">
+              <span class="material-symbols-rounded" [class.filled]="showNew" aria-hidden="true">
+                {{ showNew ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+          <small class="error" *ngIf="fg.get('passwordActual')?.touched && fg.get('passwordActual')?.hasError('minlength')">
+            Debe tener al menos 6 caracteres.
+          </small>
+          <small class="error" *ngIf="fg.get('passwordActual')?.touched && fg.get('passwordActual')?.hasError('required')">
+            La contraseña actual es obligatoria.
+          </small>
+        </div>
+
+        <!-- Nueva contraseña -->
+        <div class="field">
+          <label for="newpwd">Nueva contraseña:</label>
+          <div class="password-wrap">
+            <input
+              id="newpwd"
+              [type]="showConf ? 'text' : 'password'"
+              placeholder="••••••••"
+              formControlName="password"
+              autocomplete="new-password"
+              [class.is-invalid]="fg.get('password')?.touched && fg.get('password')?.invalid"
+            />
+            <button type="button"
+                    class="toggle-eye"
+                    (click)="showConf = !showConf"
+                    [attr.aria-pressed]="showConf"
+                    aria-label="Mostrar/ocultar">
+              <span class="material-symbols-rounded" [class.filled]="showConf" aria-hidden="true">
+                {{ showConf ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+          <small class="error" *ngIf="fg.get('password')?.touched && fg.get('password')?.hasError('minlength')">
+            Debe tener al menos 6 caracteres.
+          </small>
+          <small class="error" *ngIf="fg.get('password')?.touched && fg.get('password')?.hasError('required')">
+            La nueva contraseña es obligatoria.
+          </small>
+        </div>
+
+        <!-- Confirmar contraseña -->
+        <div class="field">
+          <label for="confpwd">Confirmar contraseña:</label>
+          <div class="password-wrap">
+            <input
+              id="confpwd"
+              [type]="showConf ? 'text' : 'password'"
+              placeholder="••••••••"
+              formControlName="confirm"
+              autocomplete="new-password"
+              [class.is-invalid]="fg.get('confirm')?.touched && fg.get('confirm')?.invalid"
+            />
+            <button type="button"
+                    class="toggle-eye"
+                    (click)="showConf = !showConf"
+                    [attr.aria-pressed]="showConf"
+                    aria-label="Mostrar/ocultar">
+              <span class="material-symbols-rounded" [class.filled]="showConf" aria-hidden="true">
+                {{ showConf ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+          <small class="error" *ngIf="fg.get('confirm')?.touched && fg.get('confirm')?.hasError('required')">
+            Debes confirmar la contraseña.
+          </small>
+        </div>
+
+        <!-- Mensajes -->
+        <div class="system-messages" *ngIf="(fg.touched || fg.dirty) && fg.hasError('mismatch')">
+          <p class="msg error">Las contraseñas no coinciden.</p>
+        </div>
+        <div class="system-messages" *ngIf="error">
+          <p class="msg error">{{ error }}</p>
+        </div>
+
+        <!-- Botones -->
+        <button class="btn primary" type="submit" [disabled]="fg.invalid || cargando">
+          <span *ngIf="!cargando">Cambiar contraseña</span>
+          <span *ngIf="cargando" class="spinner" aria-live="polite">Procesando…</span>
+        </button>
+
+        <div class="links">
+          <a [routerLink]="['/login']">Volver a iniciar sesión</a>
+        </div>
+      </form>
+    </div>
+
+    <p class="register">
+      ¿No tienes una cuenta?
+      <a [routerLink]="['/registro']">Regístrate</a>
+    </p>
+  </section>
+</div>

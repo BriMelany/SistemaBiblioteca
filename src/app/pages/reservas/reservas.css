@@ -12,6 +12,9 @@
   --badge-fill:  #fc3737;
   --view-fg:   #6a55f7;  
   --cancel-fg: #ff0000;
+    --filter-border: #7b82c7;
+  --filter-bg: #fff;
+  --filter-text: #1f2a37;
 }
 
 .material-symbols-rounded{
@@ -173,6 +176,7 @@
   box-shadow:0 20px 60px rgba(0,0,0,.25);
   z-index:90;
 }
+
 .modal__body{
     width:90%;
     margin: 0 auto;
@@ -181,7 +185,7 @@
     font-weight: 600;
 }
 /* ===== Canclar reserva ===== */
-.modal--danger{
+.modal--danger, .modal--success{
   background:#FFF3F3;  
   border:1.5px solid #fca5a5;  
   width:min(90vw, 450px);
@@ -193,7 +197,15 @@
   border-radius:14px;   
   margin:0;    
 }
+.modal--success{
+  display: block;
+position: fixed;
+z-index: 1000;
+left: 50%;
+top: 50%;
+transform: translate(-50%, -50%);
 
+}
 /* Acciones centradas con gap (equivalente a .modal__actions) */
 .modal.card .actions{
   display: flex;
@@ -284,16 +296,100 @@ align-items: center;
 
 .meta p{ margin:4px 0; color:#7b82c7; }
 
-.pill{
-  display:inline-block; padding:8px 14px; border-radius:999px; font-weight:800;
+.badge{
+  display:inline-block; padding:8px 14px; border-radius:999px; font-weight:700;
 }
 .pill--ok{     background:#eafbf2; color:#157f4a; } 
 .pill--warn{   background:#fff7e6; color:#b15c00; }   
 .pill--danger{ background:#ffe6e6; color:#b42318; } 
 
+.badge.is-cumplida { background: #eafbf2; color:#157f4a; }   /* verde */
+.badge.is-expirada { background: #ffe6e6; color:#b42318; }   /* rojo */
+.badge.is-pendiente{ background: #fff7e6; color:#b15c00; }   /* ámbar */
+
 .pager{ display:flex; justify-content:center; gap:6px; padding:14px 0 4px; }
 .pager__info{ color:#7b8190; font-size:12px; }
 .pager__nav{ display:flex; align-items:center; gap:6px; }
+
+.toolbar__row--filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+}
+
+/* Mismo look para los 4 filtros */
+.toolbar__row--filters label.search,
+.toolbar__row--filters label.usuario,
+.toolbar__row--filters label.notif,
+.toolbar__row--filters label.estado {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  height: 42px;
+  padding: 0 .75rem;
+  border: 1px solid var(--filter-border);
+  border-radius: .6rem;
+  background: var(--filter-bg);
+  color: var(--filter-text);
+
+  /* => MISMO TAMAÑO para todos */
+  flex: 0 0 240px;   /* ancho fijo visual igual */
+  max-width: 100%;
+}
+
+/* Texto "Usuario:", "Notificado por:", "Estado:" */
+.usuario__text,
+.notif__text,
+.estado__text {
+  font-size: .9rem;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+/* Inputs internos (select/date) ocupan todo */
+.toolbar__row--filters label select,
+.toolbar__row--filters label input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: var(--filter-text);
+  width: 100%;
+  padding-right: 1.6rem; /* espacio para icono */
+}
+
+/* Iconos de la derecha */
+.toolbar__row--filters label.usuario > .material-symbols-rounded,
+.toolbar__row--filters label.notif  > .material-symbols-rounded,
+.toolbar__row--filters label.estado > .material-symbols-rounded {
+  position: absolute;
+  right: .45rem;
+  font-size: 20px;
+  color: var(--filter-border);
+  pointer-events: none;  /* estos no son clickeables */
+}
+
+/* El icono del date SÍ es clickeable: no le quites pointer events */
+.toolbar__row--filters label.search > .material-symbols-rounded {
+  position: absolute;
+  right: .45rem;
+  font-size: 20px;
+  color: var(--filter-border);
+}
+
+/* Foco visible consistente (sin :has, para máxima compatibilidad) */
+.toolbar__row--filters label.search:focus-within,
+.toolbar__row--filters label.usuario:focus-within,
+.toolbar__row--filters label.notif:focus-within,
+.toolbar__row--filters label.estado:focus-within {
+  box-shadow: 0 0 0 3px rgba(123,130,199, .20);
+}
+.icon--approve span.material-symbols-rounded {
+  color: #7c3aed; /* morado */
+}
 
 .pg-btn{
   min-width:32px; height:32px; padding:0 10px;

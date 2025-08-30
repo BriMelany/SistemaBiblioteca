@@ -3,40 +3,15 @@ import { Component, HostListener, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, RolBD } from '../../core/auth/auth';
+import { CatalogoService } from './data/catalogo-service'; 
+import { CatalogoVista } from './models/catalogo-vista';
 
-type Recurso = {
-  id: string;
-  tipo: string;
-  titulo: string;
-  autor: string;
-  editorial: string;
-  anio: number;
-  categoria: string;
-
-  es_consulta_sala: boolean;
-  isbn?: string;
-  subtitulo?: string;
-  descripcion?: string;
-  portadaUrl?: string;
-
-  // Campos adicionales (usados en el modal)
-  fecha_ingreso?: Date | string;
-  ejemplares?: number;
-  estado?: string; // 'Activo' | 'En revision' | 'Retirado' | ...
-};
+type Recurso = CatalogoVista;
 
 type UIRol = 'Administrador' | 'Bibliotecario' | 'Usuario';
 type AccionFila = 'Ver' | 'EditarRecurso' | 'RegistrarEjemplar';
 type AccionDetalle = 'reservar' | 'prestamo';
-type TableCol =
-  | 'tipo'
-  | 'titulo'
-  | 'autor'
-  | 'editorial'
-  | 'anio'
-  | 'categoria'
-  | 'ejemplares'
-  | 'acciones';
+type TableCol =  | 'tipo'  | 'titulo'  | 'autor'  | 'editorial'  | 'anio'  | 'categoria'  | 'ejemplares'  | 'acciones';
 
 @Component({
   selector: 'app-catalogo',
@@ -48,6 +23,18 @@ type TableCol =
 export class Catalogo {
   private router = inject(Router);
   private auth   = inject(AuthService);
+  private catalogoService = inject(CatalogoService);
+
+ngOnInit() {
+  this.catalogoService.listarCatalogo().subscribe({
+    next: (recursos) => {
+      this.recursos = recursos;
+    },
+    error: (err) => {
+      console.error('Error al cargar catálogo:', err);
+    }
+  });
+}
 
   // ================== ROL (desde AuthService) ==================
   private readonly ROLE_UI: Record<RolBD, UIRol> = {
@@ -63,15 +50,8 @@ export class Catalogo {
   get isStaff()   { return this.auth.hasRole('ADMINISTRADOR','BIBLIOTECARIO'); }
   get isUsuario() { return this.auth.hasRole('ESTUDIANTE','PROFESOR'); }
 
-  // ================== DATA DEMO ==================
-  recursos: Recurso[] = [
-    { id:'1', tipo:'Libro',  titulo:'Cien años de soledad', autor:'Gabriel G. Márquez', editorial:'Sudamericana', anio:1967, categoria:'Novela', es_consulta_sala:true,  isbn:'978-84-376-0494-7', subtitulo:'……', descripcion:'[Texto aquí]', portadaUrl:'https://www.rae.es/sites/default/files/portada_cien_anos_de_soledad_0.jpg', ejemplares: 3, fecha_ingreso: new Date('2023-01-01'), estado: 'Activo' },
-    { id:'2', tipo:'Libro',  titulo:'Introducción a Angular', autor:'Autor 7', editorial:'TechPress', anio:2024, categoria:'Tecnología', es_consulta_sala:false, isbn:'978-1-234-56789-0', subtitulo:'……', descripcion:'[Texto aquí]', portadaUrl:'https://edit.org/images/cat/portadas-libros-big-2019101610.jpg', ejemplares: 5, fecha_ingreso: new Date('2023-02-01'), estado: 'En revision' },
-    { id:'3', tipo:'Recurso',titulo:'Mapa histórico', autor:'Autor 3', editorial:'GeoEdit', anio:2003, categoria:'Historia', es_consulta_sala:false, isbn:'978-1-234-56789-0', subtitulo:'……', descripcion:'[Texto aquí]', portadaUrl:'https://wl-genial.cf.tsp.li/resize/728x/jpg/ba3/e72/337d485c37af5cf13264ff037c.jpg', ejemplares: 2, fecha_ingreso: new Date('2023-03-01'), estado: 'Activo' },
-    { id:'4', tipo:'Libro',  titulo:'Patrones de Diseño', autor:'Autor 5', editorial:'TechPress', anio:1994, categoria:'Tecnología', es_consulta_sala:true, isbn:'978-1-234-56789-0', subtitulo:'……', descripcion:'[Texto aquí]', portadaUrl:'https://i.pinimg.com/736x/5b/55/88/5b5588929b6f46d55f62e775c3e8d101.jpg', ejemplares: 4, fecha_ingreso: new Date('2023-04-01'), estado: 'Activo' },
-    { id:'5', tipo:'Recurso',titulo:'Enciclopedia', autor:'Varios', editorial:'General', anio:2005, categoria:'Referencia', es_consulta_sala:false, isbn:'978-84-376-0494-7', subtitulo:'……', descripcion:'[Texto aquí]', portadaUrl:'https://gtechdesign.net/images/articu-2/portada-libro-3.webp', ejemplares: 1, fecha_ingreso: new Date('2023-05-01'), estado: 'Retirado' },
-    { id:'6', tipo:'Libro',  titulo:'El Quijote', autor:'Cervantes', editorial:'Clásicos', anio:1605, categoria:'Literatura', es_consulta_sala:true, fecha_ingreso: new Date('2023-06-01'), estado: 'Activo', isbn:'978-84-376-0494-7', subtitulo:'……', descripcion:'[Texto aquí]', portadaUrl:'https://www.rae.es/sites/default/files/portada_el_quijote.jpg', ejemplares: 6 },
-  ];
+  // ================== DATA API ==================
+  recursos: Recurso[] = [];
 
   // ================== TABLA ==================
   seleccion: Recurso | null = null;
@@ -118,15 +98,17 @@ export class Catalogo {
   accionButton() { this.router.navigate(['catalogo/acciones/nuevo-recurso']); }
 
   solicitarReserva(r: Recurso) {
-    this.router.navigate(['/reservas/acciones/registra-reserva'], { state: { recurso: r }, queryParams: { id: r.id } });
-    this.cerrarDetalle();
+    this.router.navigate(
+  ['/reservas/acciones/registra-reserva'], 
+  { state: { recurso: r } }
+);
+
   }
 
-  realizarPrestamo(r: Recurso) {
-    this.router.navigate(['/prestamos/acciones/nuevo'], { state: { recurso: r }, queryParams: { id: r.id } });
+realizarPrestamo(r: Recurso) {
+    this.router.navigate(['prestamos/generar-prestamo-sinreserva'], { queryParams: { id: r.id } });
     this.cerrarDetalle();
   }
-
   // ================== FILTROS & PAGINACIÓN ==================
   q = '';
   showTipo = true;

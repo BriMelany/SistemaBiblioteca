@@ -3,11 +3,8 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-
-// ⬇️ IMPORTA DESDE auth.service.ts (ajusta la ruta según tu árbol)
 import { AuthService } from '../../core/auth/auth';
-// Si tu login está en src/app/auth/login.component.ts, la ruta sería:
-// import { AuthService } from '../core/auth/auth.service';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -29,17 +26,15 @@ export class LoginComponent  {
     password: ['', Validators.required]
   });
 
-  // ---- único onSubmit (usa mapeo de códigos)
   async onSubmit() {
   if (this.form.invalid || this.loading) return;
   this.loading = true; this.loginError = null;
 
   const { username, password } = this.form.value;
   try {
-    await firstValueFrom(this.auth.login(username!, password!)); // aquí ya se guardó el token
-    this.router.navigate(['/inicio']); // asegúrate que esta ruta exista
+    await firstValueFrom(this.auth.login(username!, password!));
+    this.router.navigate(['/inicio']);
   } catch (e:any) {
-    // maneja mensajes por 'codigo' si llega 401
     this.loginError = e?.error?.mensaje ?? 'No se pudo iniciar sesión.';
   } finally {
     this.loading = false;

@@ -1,0 +1,156 @@
+:host { display: block; }
+
+.login-page {
+  min-height: 90dvh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #f4f6ff;
+  width: 90%;
+  margin: 4px auto;
+  border-radius: 15px;
+}
+
+.brand-panel {
+  display: grid;
+  place-items: stretch;  
+  padding: 0; 
+  background: #dfe3ff;
+  border-radius: 15px 0 0 15px;
+  overflow: hidden; 
+}
+.brand-card {
+  width: 210%;
+  height: 120%;
+  background: transparent;
+  border-radius: inherit;
+  display: grid;
+  position: relative;
+  background: url('../img/login.jpg') center / cover no-repeat; 
+  overflow: hidden; 
+}
+
+.brand-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.brand-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;  
+  background: rgba(124, 92, 150, 0.35); 
+  pointer-events: none; 
+  border-radius: inherit;
+}
+
+.form-panel {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 2rem;
+}
+.title { margin-bottom: 1.25rem; color:#4a4de6; font-weight: 800; }
+
+.card {
+  width: min(440px, 92%);
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem 1.25rem 1.25rem;
+  box-shadow: 0 8px 28px rgba(0,0,0,.08);
+}
+
+.avatar { width:88px; height:88px; margin: 0 auto 1rem; border-radius: 50%; background:#e9e9ff; display:grid; place-items:center; }
+.avatar svg { width:56px; height:56px; stroke:#4a4de6; fill:#4a4de6; }
+
+.field { margin-bottom: 1rem; }
+label { display:block; margin-bottom:.4rem; font-weight:600; color:#3b3b68; }
+input {
+  width: 94%; border:1px solid #cfd2ff; border-radius:.6rem;
+  padding:.7rem .9rem; outline: none; font-size: .95rem; background:#fbfbff;
+}
+input:focus { border-color:#6a6eff; box-shadow: 0 0 0 3px rgba(106,110,255,.18); }
+.is-invalid { border-color:#ff6b6b; }
+
+.password-wrap { position: relative; }
+.material-symbols-rounded{
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 22px; line-height: 1;
+}
+.material-symbols-rounded.filled{
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; /* se “rellena” al mostrar */
+}
+.password-wrap{ position:relative; }
+.toggle-eye{
+  position:absolute; right:.25rem; top:50%; transform:translateY(-50%);
+  border:0; background:transparent; padding:.35rem; cursor:pointer;
+}
+
+.error { color:#d33; font-size:.82rem; }
+
+.system-messages { margin:.25rem 0 .5rem; }
+.system-messages .msg { font-size:.82rem; line-height:1.15rem; }
+.system-messages .warn { color:#c25800; }
+.system-messages .error { color:#d33; }
+
+.btn.primary {
+  width: 100%; padding:.8rem 1rem; border:0; border-radius:.7rem;
+  background:#5a63f6; color:#fff; font-weight:700; cursor:pointer;
+}
+.btn.primary:disabled { opacity:.6; cursor:not-allowed; }
+.spinner { display:inline-block; }
+
+.links, .register { text-align:center; margin-top:.8rem; }
+.links a, .register a { color:#4a4de6; text-decoration: none; font-weight:600; }
+/* Banner superior de éxito */
+.flash {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  width: 80%;                /* mismo ancho que .card */
+  margin: 0 auto 1rem;       /* centrado y separado de la card */
+  padding: .75rem 1rem;
+  border-radius: .75rem;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 28px rgba(0,0,0,.08);
+  position: sticky;          /* se mantiene arriba al hacer scroll */
+  top: .75rem;
+  z-index: 5;
+  animation: slideDown .25s ease-out;
+}
+
+.flash--ok {
+  background: #eaf8ef;
+  border-color: #bfeacb;
+  color: #1b7a42;
+  font-weight: 600;
+}
+
+.flash .material-symbols-rounded {
+  font-variation-settings: 'FILL' 1;
+}
+
+.flash__close {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* Animación suave */
+@keyframes slideDown {
+  from { transform: translateY(-8px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Ajuste: que el título no quede tan lejos de la card */
+.form-panel .title { margin-bottom: .75rem; }
+
+@media (max-width: 880px) {
+  .login-page { grid-template-columns: 1fr; }
+  .brand-panel { display:none; }
+}

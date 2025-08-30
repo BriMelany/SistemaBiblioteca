@@ -12,13 +12,38 @@
 
 .brand-panel {
   display: grid;
-  place-items: center;
-  padding: 2rem;
+  place-items: stretch;  
+  padding: 0; 
   background: #dfe3ff;
   border-radius: 15px 0 0 15px;
+  overflow: hidden; 
 }
-.brand-card { width: min(520px, 90%); aspect-ratio: 16/10; background: #e8ebff; border-radius: 1rem; display:grid; place-items:center; }
-.brand-card .img-placeholder { width: 55%; opacity: .7; color:#6a6eff; }
+.brand-card {
+  width: 210%;
+  height: 120%;
+  background: transparent;
+  border-radius: inherit;
+  display: grid;
+  position: relative;
+  background: url('../login/img/login.jpg') center / cover no-repeat; 
+  overflow: hidden; 
+}
+
+.brand-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.brand-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;  
+  background: rgba(124, 92, 150, 0.35); 
+  pointer-events: none; 
+  border-radius: inherit;
+}
 
 .form-panel {
   display: grid;

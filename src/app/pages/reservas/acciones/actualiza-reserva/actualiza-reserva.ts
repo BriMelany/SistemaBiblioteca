@@ -2,9 +2,15 @@ import { Component, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 
-type Estado = 'Activa' | 'Pendiente' | 'Cancelada' | 'Vencida';
+import { ReservasService } from '../../data/reservas-service';
+import { ReservaModel } from '../../model/reserva-model';
+import { ReservaUpdate } from '../../model/reserva-update.dto';
+import { ReservaDetalle } from '../../model/reserva-detalle';
+import { AuthService, SessionUser, RolBD } from '../../../../core/auth/auth';
+import { take } from 'rxjs/operators';
+
+type Estado = 'Cumplida' | 'Expirada' | 'Pendiente';
 
 interface Usuario {
   codigo: string; nombre: string; tipo: string; estado: string;
@@ -12,122 +18,171 @@ interface Usuario {
 interface Recurso {
   portadaUrl?: string; tipo?: string; titulo?: string; autor?: string; editorial?: string;
 }
-type ReservaFilaLista = {
-  id?: string|number; codigo?: string; fecha?: string; estado?: Estado|string;
-  tipo?: string; titulo?: string; portadaUrl?: string; autor?: string; editorial?: string;
-  usuario?: Usuario;
-  tienePenalidades?: boolean; penalidades?: 'Sí'|'No'; penaliza?: boolean; montoPenalidad?: number;
-  prioridad?: string; notificacion?: 'Sí'|'No'; fechaNotificacion?: string; sustento?: string;
-};
 
 @Component({
   selector: 'app-actualiza-reserva',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, DatePipe],
   templateUrl: './actualiza-reserva.html',
-  styleUrl: './actualiza-reserva.css'
+  styleUrls: ['./actualiza-reserva.css']
 })
 export class ActualizaReserva {
-  private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private srv   = inject(ReservasService);
+  private auth = inject(AuthService);
+  private me: SessionUser | null = null;
 
   cargando = true;
   error = '';
 
-  reservaId = '';
+  reservaId = 0;
   reservaCodigo = '';
 
-  usuario: Usuario = { codigo: 'U-0001', nombre: 'Nombre Apellido', tipo: 'Estudiante / Docente', estado: 'Activo' };
+  usuario: Usuario = { codigo: '—', nombre: '—', tipo: '—', estado: '—' };
   recurso: Recurso = { portadaUrl: '', tipo: '', titulo: '', autor: '', editorial: '' };
 
-  // Fechas
   fechaReserva: Date | null = null;
   fechaExpiracion: Date | null = null;
 
-  // Penalidades
   tienePenalidades = false;
   montoPenalidad = 0;
-  get resultadoPenalidadTexto() { return this.tienePenalidades ? 'Presenta penalidades' : 'No presenta penalidades'; }
 
-  // Editables
+  get resultadoPenalidadTexto() {
+    return this.tienePenalidades ? 'Presenta penalidades' : 'No presenta penalidades';
+  }
+
   notificacion: 'Sí' | 'No' = 'No';
   notificacionBloqueada = false;
   fechaNotificacion: Date | null = null;
   estadoReserva: Estado = 'Pendiente';
   sustento = '';
+  notificadoPor = '';
 
-  // Listas de estado
-  readonly ESTADOS_TODOS: Estado[] = ['Activa', 'Pendiente', 'Cancelada', 'Vencida'];
-  readonly ESTADOS_SIN_ACTIVA: Estado[] = ['Pendiente', 'Cancelada', 'Vencida']; // <- SIEMPRE estos 3
-  estadosDisponibles: Estado[] = [...this.ESTADOS_SIN_ACTIVA];
-  opcionesNotificacion: Array<'Sí'|'No'> = ['No','Sí'];
+  readonly ESTADOS_TODOS: Estado[] = ['Cumplida', 'Expirada', 'Pendiente'];
+  estadosDisponibles: Estado[] = [...this.ESTADOS_TODOS];
+  opcionesNotificacion: Array<'Sí'|'No'> = ['No', 'Sí'];
 
-  // Modo lectura total si estado llega Activa
   soloLecturaTotal = false;
-
-  // Solo lectura
   prioridad = '001 (Orden en la lista de espera)';
 
   ngOnInit() {
-    const fila = (history.state?.reserva || {}) as ReservaFilaLista;
+    this.auth.hydrateUser().catch(() => {});
+    this.auth.user$.pipe(take(1)).subscribe(u => this.me = u ?? null);
+    const st = (history.state as { reserva?: any } | undefined)?.reserva;
+    const id = Number(this.route.snapshot.paramMap.get('id') || 0);
 
-    if (!fila || (!fila.id && !fila.codigo && !fila.titulo && !fila.tipo)) {
-      this.error = 'No se recibieron datos desde la lista de reservas.';
+    if (st) {
+      this.mountFromAny(st);
       this.cargando = false;
       return;
     }
-
-    // Mapear base
-    this.reservaId = (fila.id ?? '').toString();
-    this.reservaCodigo = fila.codigo ?? '';
-    this.recurso = {
-      tipo: fila.tipo ?? '', titulo: fila.titulo ?? '', portadaUrl: fila.portadaUrl ?? '',
-      autor: fila.autor ?? '', editorial: fila.editorial ?? ''
-    };
-    if (fila.usuario) this.usuario = fila.usuario;
-
-    // Fechas (LOCAL)
-    this.fechaReserva = this.parseFechaLocal(fila.fecha);
-    this.fechaExpiracion = this.fechaReserva ? this.addDays(this.fechaReserva, 7) : null;
-
-    this.prioridad = fila.prioridad ?? this.prioridad;
-
-    // Estado inicial
-    const esValido = this.ESTADOS_TODOS.includes(fila.estado as Estado);
-    this.estadoReserva = esValido ? (fila.estado as Estado) : this.estadoReserva;
-
-    // Solo lectura si llega Activa
-    this.soloLecturaTotal = this.estadoReserva === 'Activa';
-
-    // Notificación inicial
-    this.notificacion = fila.notificacion === 'Sí' ? 'Sí' : 'No';
-    this.fechaNotificacion = this.notificacion === 'Sí'
-      ? (this.parseFechaLocal(fila.fechaNotificacion) ?? this.hoyLocal())
-      : null;
-
-    // Penalidades
-    this.tienePenalidades = !!fila.tienePenalidades || fila.penalidades === 'Sí' || !!fila.penaliza;
-    this.montoPenalidad = typeof fila.montoPenalidad === 'number' ? Math.max(0, fila.montoPenalidad) : (this.tienePenalidades ? 50 : 0);
-
-    // Reglas:
-    if (!this.soloLecturaTotal) {
-      this.aplicarReglas();
-    } else {
-      // lectura total: bloquear todo y mostrar estado actual
-      this.notificacionBloqueada = true;
-      this.estadosDisponibles = [this.estadoReserva];
+    if (id > 0) {
+      this.srv.getDetalle(id).subscribe({
+        next: (det: any) => {
+          const first = Array.isArray(det) ? det[0] : det;
+          this.mountFromAny(first);
+          this.cargando = false;
+        },
+        error: () => {
+          this.error = 'No se pudo cargar la reserva.';
+          this.cargando = false;
+        }
+      });
+      return;
     }
-
-    this.sustento = fila.sustento ?? '';
-
-         // === DEMO: forzar penalidades aquí ===
-    this.tienePenalidades = true;           // <--- cambia a false para el otro caso
-    this.montoPenalidad   = this.tienePenalidades ? 50 : 0;  // monto demo
-    this.aplicarReglas();          // bloquea Notificación y limita Estado si corresponde
-
+    this.error = 'No se recibieron datos de la reserva.';
     this.cargando = false;
   }
+
+  private mapRolUi(r?: RolBD | string): string {
+    switch ((r ?? '').toString().toUpperCase()) {
+      case 'ADMINISTRADOR': return 'Administrador';
+      case 'BIBLIOTECARIO': return 'Bibliotecario';
+      case 'PROFESOR':      return 'Usuario';
+      case 'ESTUDIANTE':    return 'Usuario';
+      default:              return 'Usuario';
+    }
+  }
+
+  private fillUsuario(row: any) {
+    const uNombre  = row?.usuarioNombre ?? row?.usuario ?? this.me?.nombreCompleto ?? '—';
+    const uCodigo  = row?.usuarioCodigo ?? row?.usuarioId ?? this.me?.usuario ?? String(this.me?.id ?? '—');
+    const uRolSrc  = row?.usuarioRol ?? this.me?.rol;
+    const uEstado  = row?.usuarioEstado ?? '—';
+
+    this.usuario = {
+      nombre: uNombre,
+      codigo: String(uCodigo),
+      tipo: this.mapRolUi(uRolSrc),
+      estado: uEstado
+    };
+  }
+
+  /** Normaliza ReservaDetalle | ReservaModel a un solo shape */
+private mountFromAny(row: ReservaModel | ReservaDetalle | any) {
+  const isApiShape = 'reservaId' in row;
+  const normalizado: ReservaModel = isApiShape
+    ? {
+        id: row.reservaId,
+        recurso: row.tituloRecurso,
+        tipoRecurso: row.tipoRecursoNombre,
+        fecha: row.fechaReserva,
+        expiracion: row.fechaExpiracion,
+        estado: row.estado,
+        usuario: row.usuario,
+        notificado: row.notificado,
+        notificadoPor: row.notificadoPor ?? '',
+      }
+    : row;
+
+  this.reservaId = normalizado.id;
+  this.reservaCodigo = this.codigo(normalizado.id);
+
+  // Datos parciales del recurso
+  this.recurso = {
+    tipo: normalizado.tipoRecurso,
+    titulo: normalizado.recurso,
+    portadaUrl: (row as any).portadaUrl ?? '',
+    autor: '',
+    editorial: ''
+  };
+
+  // Traer autor/editorial de otra API si no vienen
+  if (!(row as any).autor && !(row as any).editorial && (row as any).recursoId) {
+    this.srv.getRecurso((row as any).recursoId).subscribe({
+      next: (res: any) => {
+        this.recurso.autor = res.autor ?? '';
+        this.recurso.editorial = res.editorial ?? '';
+      },
+      error: () => {
+        this.recurso.autor = '';
+        this.recurso.editorial = '';
+      }
+    });
+  }
+
+  this.fillUsuario(row);
+
+  this.fechaReserva = this.parseFechaLocal(normalizado.fechaReserva);
+  this.fechaExpiracion = this.parseFechaLocal(normalizado.fechaExpiracion);
+  this.estadoReserva = this.mapEstadoUi(normalizado.estado);
+  this.notificacion = normalizado.notificado ? 'Sí' : 'No';
+  this.fechaNotificacion = (row as any).fechaNotificacion
+    ? this.parseFechaLocal((row as any).fechaNotificacion)
+    : null;
+
+  this.tienePenalidades = false;
+  this.montoPenalidad = 0;
+
+  this.soloLecturaTotal = this.estadoReserva === 'Cumplida';
+  if (!this.soloLecturaTotal) {
+    this.aplicarReglas();
+  } else {
+    this.notificacionBloqueada = true;
+    this.estadosDisponibles = [this.estadoReserva];
+  }
+}
 
   onNotificacionChange(val: 'Sí' | 'No') {
     if (this.soloLecturaTotal) return;
@@ -135,17 +190,12 @@ export class ActualizaReserva {
     this.fechaNotificacion = val === 'Sí' ? this.hoyLocal() : null;
   }
 
-  /** Nueva regla: SIEMPRE 3 estados (sin 'Activa'). Penalidades solo bloquea Notificación. */
   private aplicarReglas() {
-    // Estado siempre entre estos 3
-    this.estadosDisponibles = [...this.ESTADOS_SIN_ACTIVA];
-
-    // Si el estado actual no está en la lista (ej. venía 'Activa'), muévelo a 'Pendiente'
+    this.estadosDisponibles = [...this.ESTADOS_TODOS];
     if (!this.estadosDisponibles.includes(this.estadoReserva)) {
       this.estadoReserva = 'Pendiente';
     }
 
-    // Penalidades: solo afectan Notificación (bloquear), NO la lista de estados
     if (this.tienePenalidades) {
       this.notificacionBloqueada = true;
       this.notificacion = 'No';
@@ -155,35 +205,55 @@ export class ActualizaReserva {
     }
   }
 
-  actualizar() {
-    if (this.soloLecturaTotal || !this.reservaId) return;
-
-    this.cargando = true;
-    const body = {
-      estado: this.estadoReserva,
-      notificacion: this.notificacion === 'Sí',
-      fechaNotificacion: this.fechaNotificacion ? this.toYMD(this.fechaNotificacion) : null,
-      sustento: this.sustento?.trim() || null,
-      penalidades: this.tienePenalidades,
-      montoPenalidad: this.montoPenalidad
-    };
-
-    console.log('PATCH demo', { id: this.reservaId, ...body });
-    this.cargando = false;
-    this.router.navigate(['/reservas']);
+  private mapEstadoUi(e: string): Estado {
+    switch ((e || '').toLowerCase()) {
+      case 'cumplida': return 'Cumplida';
+      case 'expirada': return 'Expirada';
+      case 'pendiente':
+      default:          return 'Pendiente';
+    }
+  }
+  private toApiEstado(e: Estado): 'cumplida' | 'expirada' | 'pendiente' {
+    switch (e) {
+      case 'Cumplida': return 'cumplida';
+      case 'Expirada': return 'expirada';
+      default:         return 'pendiente';
+    }
   }
 
-  // ==== Fechas (LOCAL) ====
+  codigo(id: number | string): string {
+    const n = Number(id) || 0;
+    return `RE${n.toString().padStart(3, '0')}`;
+  }
+
   private parseFechaLocal(s?: string): Date | null {
     if (!s) return null;
     const mIso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (mIso) return new Date(+mIso[1], +mIso[2]-1, +mIso[3], 0,0,0,0);
+    if (mIso) return new Date(+mIso[1], +mIso[2] - 1, +mIso[3], 0, 0, 0, 0);
     const mLat = s.match(/^(\d{2})\/(\d{2})\/(\d{2}|\d{4})$/);
-    if (mLat) { const yyyy = mLat[3].length===2 ? 2000 + +mLat[3] : +mLat[3]; return new Date(yyyy, +mLat[2]-1, +mLat[1], 0,0,0,0); }
-    const dAny = new Date(s); if (!isNaN(dAny.getTime())) return new Date(dAny.getUTCFullYear(), dAny.getUTCMonth(), dAny.getUTCDate(), 0,0,0,0);
+    if (mLat) {
+      const yyyy = mLat[3].length === 2 ? 2000 + +mLat[3] : +mLat[3];
+      return new Date(yyyy, +mLat[2] - 1, +mLat[1], 0, 0, 0, 0);
+    }
+    const dAny = new Date(s);
+    if (!isNaN(dAny.getTime()))
+      return new Date(dAny.getUTCFullYear(), dAny.getUTCMonth(), dAny.getUTCDate(), 0, 0, 0, 0);
     return null;
   }
-  private addDays(d: Date, n: number) { const r = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0,0); r.setDate(r.getDate()+n); return r; }
-  private hoyLocal() { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate(), 0,0,0,0); }
-  private toYMD(d: Date) { const y=d.getFullYear(); const m=(d.getMonth()+1).toString().padStart(2,'0'); const dd=d.getDate().toString().padStart(2,'0'); return `${y}-${m}-${dd}`; }
+
+  private addDays(d: Date, n: number) {
+    const r = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+    r.setDate(r.getDate() + n);
+    return r;
+  }
+  private hoyLocal() {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate(), 0, 0, 0, 0);
+  }
+  private toYMD(d: Date) {
+    const y = d.getFullYear();
+    const m = (d.getMonth() + 1).toString().padStart(2, '0');
+    const dd = d.getDate().toString().padStart(2, '0');
+    return `${y}-${m}-${dd}`;
+  }
 }

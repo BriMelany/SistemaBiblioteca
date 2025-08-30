@@ -99,8 +99,95 @@
 
 .btn-gray{  background:#e5e7eb; color:#5b5d61; }
 .btn-gray:hover{ filter: brightness(.97); }
-
 .btn:disabled{ opacity:.6; cursor:not-allowed; }
+/* Modal overlay */
+.modal-error {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none; /* oculto por defecto */
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(.8px); /* desenfoque del fondo */
+  background: rgba(0,0,0,0.25); /* semi-transparente */
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
+.modal-error.show {
+  display: flex;
+}
+
+/* Modal box */
+.modal-content-error {
+  background: #fff;
+  border-radius: 16px;
+  padding: 25px 20px;
+  width: 360px;
+  max-width: 90%;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  animation: modalFade 0.3s ease;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Modal header */
+.modal-header-error {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f44336;
+  margin-bottom: 15px;
+  text-align: center; /* título centrado */
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: #999;
+  padding: 5px 10px;
+}
+
+.close-btn:hover {
+  color: #f44336;
+}
+
+/* Modal body */
+.modal-body-error {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+/* Modal footer */
+.modal-footer-error button {
+  background-color: #f44336;
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.modal-footer-error button:hover {
+  background-color: #d32f2f;
+}
+
+/* Animación de aparición */
+@keyframes modalFade {
+  from { transform: translateY(-20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
 
 
 @media (max-width: 992px){

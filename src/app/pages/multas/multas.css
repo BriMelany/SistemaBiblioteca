@@ -140,3 +140,17 @@
   --modal-body-fg:#3f3cd1;
   --modal-primary-bg:#4f46e5; --modal-primary-fg:#fff;
 }
+.modal--ver .modal__header {
+  background-color: #4a90e2;
+  color: white;
+  font-weight: bold;
+}
+
+.modal--ver .modal__body p {
+  margin: 0.5rem 0;
+}
+
+.modal--ver .modal__actions {
+  text-align: right;
+  margin-top: 1rem;
+}

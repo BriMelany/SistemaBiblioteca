@@ -5,9 +5,9 @@
   <div class="toolbar">
     <div class="toolbar__row--filters">
         @if (rol === 'Administrador') {
-       <button class="btn-primary" [routerLink]="['/multas/acciones/configuracion']">
-            <span class="material-symbols-rounded">settings</span> Configuración de multas
-        </button>
+      <button class="btn-primary" (click)="recargarTabla()">
+        <span class="material-symbols-rounded">refresh</span> Recargar
+      </button>
         }
     </div>
     <div class="toolbar__row--filters">
@@ -30,6 +30,7 @@
     </div>
   </div>
 
+
   <!-- Tabla -->
   <div class="card table-wrap">
     <table class="tabla">
@@ -48,11 +49,11 @@
       </thead>
 
       <tbody>
-        @for (m of filtrada; track m.id) {
+        @for (m of filtrada; track m.multaId) {
           <tr>
-            <td>{{ m.codigo }}</td>
-            <td class="ellipsis">{{ m.usuario }}</td>
-            <td>{{ m.codPrestamo }}</td>
+            <td>{{ m.multaId }}</td>
+            <td class="ellipsis">{{ m.usuarioNombre }}</td>
+            <td>{{ m.prestamoId }}</td>
             <td>{{ m.monto | number:'1.2-2' }} S/.</td>
             <td>{{ m.fechaGeneracion | date:'dd/MM/yyyy' }}</td>
             <td>{{ m.diasRetraso }}</td>
@@ -128,8 +129,8 @@
       </div>
 
       <div class="modal__body">
-        <p><strong>Prestamo:</strong> {{ sel.codPrestamo }}</p>
-        <p><strong>Usuario:</strong> {{ sel.usuario }}</p>
+        <p><strong>Prestamo:</strong> {{ sel.prestamoId }}</p>
+        <p><strong>Usuario:</strong> {{ sel.usuarioNombre }}</p>
 
         <p *ngIf="modalTipo==='pago'">
           <strong>Monto:</strong> {{ sel.monto | number:'1.2-2' }} S/.
@@ -146,3 +147,28 @@
     </div>
   </div>
 }
+
+<!-- Modal de Ver detalle -->
+<div *ngIf="modalVerAbierto && selVer" class="modal is-open" role="dialog" aria-modal="true" (keydown.escape)="cerrarModalVer()" tabindex="-1">
+  <div class="modal__overlay" (click)="cerrarModalVer()"></div>
+
+  <div class="modal__card modal--ver" (click)="$event.stopPropagation()">
+    <div class="modal__header">Detalle completo de la multa</div>
+
+    <div class="modal__body">
+      <p><strong>Código:</strong> {{ selVer.multaId }}</p>
+      <p><strong>Usuario:</strong> {{ selVer.usuarioNombre }}</p>
+      <p><strong>Documento:</strong> {{ selVer.usuarioDocumento }}</p>
+      <p><strong>Prestamo:</strong> {{ selVer.prestamoId }}</p>
+      <p><strong>Monto:</strong> {{ selVer.monto | number:'1.2-2' }} S/.</p>
+      <p><strong>Estado:</strong> {{ selVer.estado }}</p>
+      <p><strong>Motivo:</strong> {{ selVer.motivo }}</p>
+      <p *ngIf="selVer.fechaPago"><strong>Fecha de Pago:</strong> {{ selVer.fechaPago | date:'dd/MM/yyyy' }}</p>
+      <p><strong>Días de retraso:</strong> {{ selVer.diasRetraso }}</p>
+    </div>
+
+    <div class="modal__actions">
+      <button class="btn btn-lg btn-primary" (click)="cerrarModalVer()">Cerrar</button>
+    </div>
+  </div>
+</div>

@@ -1,203 +1,250 @@
 // src/app/pages/reservas/reservas.ts
-import { Component, inject, HostListener } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router'; 
-import { Router } from '@angular/router';
+import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { RouterLink, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ReservasService } from './data/reservas-service'; // respeta tu ruta actual
+import { AuthService, RolBD } from '../../core/auth/auth';
+import { ReservaModel } from './model/reserva-model';
+import { CatalogoService } from '../../pages/catalogo/data/catalogo-service';
 
-type Estado = 'Activa' | 'Pendiente' | 'Cancelada' | 'Vencida';
-type Rol = 'Administrador' | 'Bibliotecario' | 'Usuario';
-
-interface Reserva {
-  id: string;
-  codigo: string;
-  fecha: string;  
-  fechaExpiracion?: string; 
-  notificado?: boolean;
-  fechaNotificacion?: string | null; 
-  portadaUrl?: string;
-  tipo: string;
-  titulo: string;
-  estado: Estado;
-
-  //para admin/biblio:
-  usuario?: string;
-  notificacion?: string;
-  
-}
-
-const API = 'http://localhost:3000/api'; 
-
-type ColKey =
-  | 'codigo' | 'fecha' | 'tipo' | 'titulo'
-  | 'usuario' | 'estado' | 'notificacion' | 'acciones';
-
-type Accion = 'ver' | 'cancelar' | 'actualizar' | 'descargar';
+type VistaRol = 'Administrador' | 'Bibliotecario' | 'Usuario';
 
 @Component({
   selector: 'app-reservas',
   standalone: true,
-  imports: [DatePipe, RouterLink],
+  imports: [CommonModule, DatePipe, RouterLink, FormsModule],
   templateUrl: './reservas.html',
-  styleUrl: './reservas.css',
+  styleUrls: ['./reservas.css'],
 })
-export class Reservas {
-  private http = inject(HttpClient);
+export class Reservas implements OnInit {
+  private auth = inject(AuthService);
+  private reservasService = inject(ReservasService);
+  private catalogoService = inject(CatalogoService);
   private router = inject(Router);
-  readonly Math = Math;
+  rol: VistaRol = 'Usuario';
 
-  // ======== rol ========
-  rol: Rol = 'Usuario'; // 'Administrador' | 'Bibliotecario' | 'Usuario'
-
-  readonly headers: Record<ColKey, string> = {
-    codigo: 'Código',
-    fecha: 'Fecha Reserva',
-    tipo: 'Tipo de recurso',
-    titulo: 'Título',
-    usuario: 'Usuario',
-    estado: 'Estado',
-    notificacion: 'Notificación',
-    acciones: 'Acciones',
-  };
-
-  private readonly COLS_USUARIO: ColKey[]       = ['codigo','fecha','tipo','titulo','estado','acciones'];
-  private readonly COLS_BIBLIOTECARIO: ColKey[] = ['codigo','fecha','tipo','titulo','usuario','estado','notificacion','acciones'];
-  private readonly COLS_ADMIN: ColKey[]         = ['codigo','fecha','tipo','titulo','usuario','estado','notificacion','acciones'];
-
-  get columns(): ColKey[] {
-    switch (this.rol) {
-      case 'Administrador': return this.COLS_ADMIN;
-      case 'Bibliotecario': return this.COLS_BIBLIOTECARIO;
-      default:              return this.COLS_USUARIO;
-    }
-  }
-
-  // Acciones por rol
-  get accionesFila(): Accion[] {
-    switch (this.rol) {
-      case 'Administrador': return ['ver', 'actualizar','descargar'];
-      case 'Bibliotecario': return ['ver', 'actualizar','descargar'];
-      default:              return ['ver', 'cancelar', 'descargar']; // Usuario
-    }
-  }
-
-  // ======== Filtros ========
-  estadoFiltro: Estado | 'Todas' = 'Activa';
-  fechaFiltro = ''; // yyyy-mm-dd
-
-  // ======== Carga ========
-  cargando = false;
-  error: string | null = null;
-
-  // ======== Datos (demo local) ========
-reservas: Reserva[] = [
-  { id:'1',  codigo:'RE001',fecha:'2025-08-09',fechaExpiracion:'2025-08-16',notificado:false,fechaNotificacion:null,tipo:'Libro',titulo:'Cien años de soledad',estado:'Activa',
-    portadaUrl: 'https://www.rae.es/sites/default/files/portada_cien_anos_de_soledad_0.jpg'
-  },
-  {
-    id:'2',codigo:'RE002',fecha:'2025-08-11',fechaExpiracion:'2025-08-18',notificado:true,fechaNotificacion:'2025-08-12',tipo:'Libro',titulo:'Otro título',estado:'Pendiente',
-    portadaUrl: 'https://edit.org/images/cat/portadas-libros-big-2019101610.jpg'
-  },
-];
-
-  // ======== Selección / Modales ========
-  seleccion: Reserva | null = null;
+  get esBiblioAdmin() { return this.rol === 'Administrador' || this.rol === 'Bibliotecario'; }
+  get esUsuario() { return this.rol === 'Usuario'; }
+  amodelreserva: ReservaModel[] = [];
+  pageIndex = 1;      
+  pageSize = 5;   
+  totalPages = 1;   
+  fechaFiltro: string | null = null;
+  estadoFiltro: string | null = null; 
+  pages: number[] = []; 
+  reservasPaginadas: ReservaModel[] = [];
+  seleccion: ReservaModel | null = null;
   mostrarConfirmar = false;
+  mostrarConfirmar1 = false;
+seleccion1: ReservaModel | null = null;
 
-  // ======== Paginación (cliente) ========
-  pageIndex = 1; // 1-based
-  pageSize  = 5;
+  error: string = '';
+  success: string = '';
 
-  get filtrada() {
-    return this.reservas.filter(r =>
-      (this.estadoFiltro === 'Todas' || r.estado === this.estadoFiltro) &&
-      (!this.fechaFiltro || r.fecha === this.fechaFiltro)
-    );
+  // ================= Ciclo de vida =================
+  async ngOnInit(): Promise<void> {
+    await this.auth.hydrateUser().catch(() => {});
+    this.rol = this.mapRol(this.auth.role);
+    this.auth.user$.subscribe((u) => {
+      const nueva = this.mapRol(u?.rol ?? 'ESTUDIANTE');
+      if (nueva !== this.rol) this.rol = nueva;
+    });
+    this.cargarReservas();
   }
-  get totalPages() { return Math.max(1, Math.ceil(this.filtrada.length / this.pageSize)); }
-  get pageStart()  { return (this.pageIndex - 1) * this.pageSize; }
-  get pageEnd()    { return this.pageStart + this.pageSize; }
-  get lista()      { return this.filtrada.slice(this.pageStart, this.pageEnd); }
-  get pages() {
-    const out: number[] = [];
-    const total = this.totalPages;
-    let start = Math.max(1, this.pageIndex - 2);
-    let end   = Math.min(total, start + 4);
-    start = Math.max(1, end - 4);
-    for (let i = start; i <= end; i++) out.push(i);
-    return out;
-  }
-  goToPage(n: number) { if (n < 1 || n > this.totalPages) return; this.pageIndex = n; }
-  prev()              { this.goToPage(this.pageIndex - 1); }
-  next()              { this.goToPage(this.pageIndex + 1); }
 
-  // ======== Ciclo de vida ========
-  ngOnInit() { this.cargar(); }
-
-  private get scope() {
-    // Ajusta a tu backend:
-    // - Usuario        -> solo sus reservas
-    // - Bibliotecario  -> su sede/biblioteca
-    // - Administrador  -> todas
-    switch (this.rol) {
-      case 'Administrador': return 'all';
-      case 'Bibliotecario': return 'branch';
-      default:              return 'mine';
+  private mapRol(r: RolBD): VistaRol {
+    switch (r) {
+      case 'ADMINISTRADOR': return 'Administrador';
+      case 'BIBLIOTECARIO': return 'Bibliotecario';
+      default: return 'Usuario';
     }
   }
 
-  cargar() {
-    this.cargando = true; this.error = null;
-    this.http.get<Reserva[]>(`${API}/reservas?scope=${this.scope}`).subscribe({
-      next: (data) => {
-        if (Array.isArray(data) && data.length) this.reservas = data;
-        this.pageIndex = 1;
-        this.cargando = false;
+  // ================= Helpers UI =================
+  codigo(id: number | string): string {
+    const n = Number(id) || 0;
+    return `RE${n.toString().padStart(3, '0')}`;
+  }
+  labelEstado(e: string): 'Cumplida' | 'Expirada' | 'Pendiente' {
+    switch ((e || '').toLowerCase()) {
+      case 'cumplida': return 'Cumplida';
+      case 'expirada': return 'Expirada';
+      default: return 'Pendiente';
+    }
+  }
+aplicarPaginacion() {
+  const total = this.amodelreserva.length;
+  this.totalPages = Math.ceil(total / this.pageSize);
+  this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+
+  const start = (this.pageIndex - 1) * this.pageSize;
+  const end = start + this.pageSize;
+  this.reservasPaginadas = this.amodelreserva.slice(start, end);
+}
+
+  // ================= Carga =================
+cargarReservas(): void {
+  this.reservasService.listar().subscribe({
+    next: rs => { 
+      this.amodelreserva = rs ?? []; 
+
+      // Traer todos los recursos
+      this.catalogoService.listarCatalogo().subscribe(recursos => {
+        this.amodelreserva = this.amodelreserva.map(r => {
+          const recurso = recursos.find(
+            rec => rec.titulo === r.recurso && rec.tipo === r.tipoRecurso
+          );
+          return {
+            ...r,
+            portadaUrl: recurso ? recurso.portadaUrl : 'assets/cover-placeholder.png'
+          };
+        });
+
+        this.aplicarFiltrosYPaginar();
+      });
+    },
+    error: err => {
+      console.error('Error cargando reservas', err);
+      this.amodelreserva = [];
+      this.aplicarFiltrosYPaginar();
+    }
+  });
+}
+
+
+  // ================= Acciones =================
+  verDetalle(r: ReservaModel): void {
+    this.seleccion = r;
+    this.mostrarConfirmar = false;
+  }
+  pedirCancelar(r: ReservaModel): void {
+    this.seleccion = r;
+    this.mostrarConfirmar = true;
+  }
+cancelar(): void {
+  if (!this.seleccion) return;
+  this.error = '';
+  this.success = '';
+  this.reservasService.cancelarReserva(this.seleccion.id).subscribe({
+    next: () => {
+      this.success = 'Reserva cancelada correctamente.';
+      this.cargarReservas();
+    },
+    error: (err) => {
+      this.error = err.error?.mensaje || 'Error al cancelar la reserva.';
+      console.error('Error cancelando reserva', err);
+      console.log('Token actual:', this.auth.token);
+    }
+  });
+}
+
+  descargar(r: ReservaModel): void {
+    this.reservasService.descargarVoucher(r.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `voucher_${r.id}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
       },
-      error: () => {
-        this.cargando = false;
-        this.error = 'No se pudieron cargar las reservas (mostrando datos de prueba).';
-      },
+      error: (err) => console.error('Error descargando voucher', err),
     });
   }
 
-  // ======== Filtros ========
-  cambiarEstado(val: string) { this.estadoFiltro = val as any; this.pageIndex = 1; }
-  cambiarFecha(val: string)  { this.fechaFiltro  = val;        this.pageIndex = 1; }
+confirmarAprobacion() {
+  if (!this.seleccion1) return;
+  this.reservasService.aprobarReserva(this.seleccion1.id).subscribe({
+    next: () => {
+      this.success = 'Reserva aprobada correctamente.';
+      this.cargarReservas();
+      setTimeout(() => this.cerrarTodo(), 1500);
+    },
+    error: (err) => {
+      this.error = err.error?.mensaje || 'Error al aprobar la reserva.';
+      console.error('Error aprobando reserva', err);
+    }
+  });
+}
+abrirConfirmacion(r: ReservaModel): void {
+  // Limpiar otros modales
+  this.seleccion = null;
+  this.mostrarConfirmar = false;
 
-  verDetalle(r: Reserva)     { this.seleccion = r; }
-  pedirCancelar(r: Reserva)  { this.seleccion = r; this.mostrarConfirmar = true; }
+  // Abrir modal aprobación
+  this.seleccion1 = r;
+  this.mostrarConfirmar1 = true;
 
-  cancelar() {
-    if (!this.seleccion) return;
-    // Llamada real:
-    // this.http.post(`${API}/reservas/${this.seleccion.id}/cancel`, {}).subscribe({
-    //   next: () => { this.seleccion!.estado = 'Cancelada'; this.cerrarTodo(); },
-    //   error: () => alert('No se pudo cancelar')
-    // });
-    // Demo local:
-    this.seleccion.estado = 'Cancelada';
-    this.cerrarTodo();
-  }
-abrirCalendario(el: HTMLInputElement) {
-  if ((el as any).showPicker) { (el as any).showPicker(); }
-  else { el.focus(); el.click(); }
+  this.error = '';
+  this.success = '';
 }
 
-actualizar(r: any) {
-  sessionStorage.setItem('selReserva', JSON.stringify(r));
-  this.router.navigate(
-    ['/reservas/acciones/actualiza-reserva'],
-    { state: { reserva: r }, queryParams: { id: r.id } }
-  );
+
+cerrarTodo(): void {
+  // Modal cancelación
+  this.seleccion = null;
+  this.mostrarConfirmar = false;
+  this.seleccion1 = null;
+this.mostrarConfirmar1 = false;
+  // Mensajes
+  this.error = '';
+  this.success = '';
 }
-  descargar(r: Reserva) {
-    // TODO: llamar API para generar/descargar comprobante (PDF)
-    // this.http.get(`${API}/reservas/${r.id}/voucher`, { responseType:'blob' }).subscribe(...)
-    console.log('Descargar comprobante de', r.id);
+
+prev() {
+  if (this.pageIndex > 1) {
+    this.pageIndex--;
+    this.aplicarPaginacion();
   }
-  cerrarTodo()    { this.mostrarConfirmar = false; this.seleccion = null; }
-  cerrarDetalle() { this.seleccion = null; }
+}
+
+next() {
+  if (this.pageIndex < this.totalPages) {
+    this.pageIndex++;
+    this.aplicarPaginacion();
+  }
+}
+
+goToPage(p: number) {
+  this.pageIndex = p;
+  this.aplicarPaginacion();
+}
+cambiarFecha(fecha: string) {
+  this.fechaFiltro = fecha || null;
+  this.aplicarFiltrosYPaginar();
+}
+cambiarEstado(estado: string) {
+  this.estadoFiltro = estado || null;
+  this.aplicarFiltrosYPaginar();
+}
+abrirCalendario(input: HTMLInputElement) {
+  input.showPicker?.();
+}
+aplicarFiltrosYPaginar() {
+  let filtradas = [...this.amodelreserva];
+
+
+  if (this.fechaFiltro) {
+    filtradas = filtradas.filter(r => {
+      const fechaRes = new Date(r.fechaReserva).toISOString().split('T')[0];
+      return fechaRes === this.fechaFiltro;
+    });
+  }
+
+if (this.estadoFiltro) {
+  filtradas = filtradas.filter(r => (r.estado || '').toLowerCase() === this.estadoFiltro!.toLowerCase());
+}
+  this.pageIndex = 1;
+  this.totalPages = Math.ceil(filtradas.length / this.pageSize);
+  this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+
+  const start = (this.pageIndex - 1) * this.pageSize;
+  const end = start + this.pageSize;
+  this.reservasPaginadas = filtradas.slice(start, end);
+}
+  // ================= UX =================
+  trackByReservaId = (_: number, r: any) => r?.id ?? _;
   @HostListener('document:keydown.escape')
-  onEsc() { this.cerrarTodo(); }
+  onEsc(): void { this.cerrarTodo(); }
 }
