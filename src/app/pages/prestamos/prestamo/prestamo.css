@@ -71,7 +71,7 @@
 .field__input{
   width:90%; padding:8px 10px; border:1px solid #e6e8ff; border-radius:10px;
 }
-.fx__footer{ padding:8px 0 0; display:flex; justify-content:flex-end; }
+.fx__footer{ display:flex; justify-content:flex-end; }
 .btn-ghost{
   border:1px solid #dfe3ff; background:#fff; padding:8px 10px; border-radius:10px; cursor:pointer;
 }
