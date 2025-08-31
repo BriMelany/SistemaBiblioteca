@@ -11,7 +11,6 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'login' },
       { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.LoginComponent) },
-      {path: 'login/registro',loadComponent: () => import('./pages/login/form-registro/form-registro').then(m => m.FormRegistro)},
       {path: 'login/recuperar',loadComponent: () => import('./pages/login/form-recuperar/form-recuperar').then(m => m.FormRecuperar)},
     ]
   },
@@ -32,7 +31,6 @@ export const routes: Routes = [
       { path: 'prestamos/generar-prestamo-conreserva', loadComponent: () => import('./pages/prestamos/generar-prestamo-conreserva/generar-prestamo-conreserva').then(m => m.GenerarPrestamoConreserva) },
       { path: 'prestamos/registrar-devolucion', loadComponent: () => import('./pages/prestamos/registrar-devolucion/registrar-devolucion').then(m => m.RegistrarDevolucion) },
       { path: 'multas', data: { roles: ['ADMINISTRADOR','BIBLIOTECARIO'] },loadComponent: () => import('./pages/multas/multas').then(m => m.Multas)},
-      { path: 'usuarios', data: { roles: ['ADMINISTRADOR'] },  loadComponent: () => import('./pages/usuarios/usuarios').then(m => m.Usuarios),},
       { path: 'catalogo/acciones/editar-recurso', loadComponent: () =>import('./pages/catalogo/acciones/editar-recurso/editar-recurso').then(m => m.EditarRecurso)},
       { path: 'catalogo/acciones/nuevo-recurso', loadComponent: () =>import('./pages/catalogo/acciones/nuevo-recurso/nuevo-recurso').then(m => m.NuevoRecurso)},
       { path: 'catalogo/acciones/registrar-ejemplar', loadComponent: () =>import('./pages/catalogo/acciones/registrar-ejemplar/registrar-ejemplar').then(m => m.RegistrarEjemplar)},

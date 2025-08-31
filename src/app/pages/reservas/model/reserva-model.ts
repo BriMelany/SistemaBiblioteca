@@ -12,5 +12,5 @@ export interface ReservaModel {
     autor?: string;
   editorial?: string;
   portadaUrl?: string;
-  penalidades?: string; 
+  penalidades?: boolean;
 }

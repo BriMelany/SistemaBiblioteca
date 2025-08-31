@@ -10,5 +10,5 @@ reservaId: number;
   fechaNotificacion: string | null;
   usuario: string;
   notificadoPor: string;
-  penalidades?: string; 
+  usuarioConDeudas?: string; 
 }

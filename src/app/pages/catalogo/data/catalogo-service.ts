@@ -15,9 +15,7 @@ export class CatalogoService {
   listarCatalogo(): Observable<CatalogoVista[]> {
     return this.http.post<CatalogoApi[]>(`${this.apiUrl}/listar`, {})
       .pipe(
-        tap(apiData => console.log('API bruto listarCatalogo:', apiData)),
         map(apiData => this.mapToView(apiData)),
-        tap(view => console.log('mapToView ->', view))
       );
   }
 

@@ -24,7 +24,7 @@ export class ReservasService {
     notificado: Boolean(row?.notificado),
     notificadoPor: String(row?.notificadoPor ?? ''),
     fechaNotificacion: row?.fechaNotificacion ?? null,
-    penalidades: row?.penalidades ?? '—'
+    penalidades: row?.usuarioConDeudas ?? '—'
   });
 
   // ---------- API ----------

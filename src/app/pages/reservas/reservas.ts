@@ -42,7 +42,7 @@ export class Reservas implements OnInit {
   // Modal detalle
   seleccion: ReservaModel | null = null;
 
-  // Modal unificado de acciones (cancelar, aprobar, rechazar)
+  // Modal unificado de acciones
   seleccionAccion: ReservaModel | null = null;
   mostrarAccion = false;
   tipoAccion: 'cancelar' | 'aprobar' | 'rechazar' | null = null;
@@ -76,10 +76,13 @@ export class Reservas implements OnInit {
     return `RE${n.toString().padStart(3, '0')}`;
   }
 
-  labelEstado(e: string): 'Cumplida' | 'Expirada' | 'Pendiente' {
+  labelEstado(e: string): 'Cumplida' | 'Expirada' | 'Pendiente' | 'Aprobado' | 'Rechazado' | 'Cancelado' {
     switch ((e || '').toLowerCase()) {
       case 'cumplida': return 'Cumplida';
       case 'expirada': return 'Expirada';
+      case 'aprobado': return 'Aprobado';
+      case 'rechazado': return 'Rechazado';
+      case 'cancelado': return 'Cancelado'; // 👈 agregado
       default: return 'Pendiente';
     }
   }
@@ -100,7 +103,6 @@ export class Reservas implements OnInit {
       next: rs => {
         this.amodelreserva = rs ?? [];
 
-        // Traer todos los recursos
         this.catalogoService.listarCatalogo().subscribe(recursos => {
           this.amodelreserva = this.amodelreserva.map(r => {
             const recurso = recursos.find(
@@ -130,7 +132,7 @@ export class Reservas implements OnInit {
   }
 
   abrirAccion(r: ReservaModel, accion: 'cancelar' | 'aprobar' | 'rechazar') {
-    this.cerrarTodo(); // cerrar cualquier modal abierto
+    this.cerrarTodo();
     this.seleccionAccion = r;
     this.tipoAccion = accion;
     this.mostrarAccion = true;
@@ -146,34 +148,32 @@ export class Reservas implements OnInit {
 
     const id = this.seleccionAccion.id;
 
+    let request$;
     if (this.tipoAccion === 'cancelar') {
-      this.reservasService.cancelarReserva(id).subscribe({
-        next: () => {
-          this.success = 'Reserva cancelada correctamente.';
-          this.cargarReservas();
-          setTimeout(() => this.cerrarTodo(), 1500);
-        },
-        error: err => this.error = err.error?.mensaje || 'Error al cancelar la reserva.'
-      });
+      request$ = this.reservasService.cancelarReserva(id);
     } else if (this.tipoAccion === 'aprobar') {
-      this.reservasService.aprobarReserva(id).subscribe({
-        next: () => {
-          this.success = 'Reserva aprobada correctamente.';
-          this.cargarReservas();
-          setTimeout(() => this.cerrarTodo(), 1500);
-        },
-        error: err => this.error = err.error?.mensaje || 'Error al aprobar la reserva.'
-      });
-    } else if (this.tipoAccion === 'rechazar') {
-      this.reservasService.rechazarReserva(id).subscribe({
-        next: () => {
-          this.success = 'Reserva rechazada correctamente.';
-          this.cargarReservas();
-          setTimeout(() => this.cerrarTodo(), 1500);
-        },
-        error: err => this.error = err.error?.mensaje || 'Error al rechazar la reserva.'
-      });
+      request$ = this.reservasService.aprobarReserva(id);
+    } else {
+      request$ = this.reservasService.rechazarReserva(id);
     }
+
+    request$.subscribe({
+      next: () => {
+        // ✅ actualizar estado local sin esperar al reload
+        if (this.seleccionAccion) {
+          this.seleccionAccion.estado = this.tipoAccion === 'aprobar'
+            ? 'Aprobado'
+            : this.tipoAccion === 'rechazar'
+              ? 'Rechazado'
+              : 'Cancelado';
+        }
+
+        this.success = `Reserva ${this.tipoAccion} correctamente.`; 
+        this.cargarReservas(); // 👈 por si quieres refrescar toda la lista
+        setTimeout(() => this.cerrarTodo(), 1500);
+      },
+      error: err => this.error = err.error?.mensaje || `Error al ${this.tipoAccion} la reserva.`
+    });
   }
 
   descargar(r: ReservaModel): void {
@@ -254,13 +254,10 @@ export class Reservas implements OnInit {
   onEsc(): void { this.cerrarTodo(); }
 
   cerrarTodo(): void {
-    // Modal detalle
     this.seleccion = null;
-    // Modal unificado
     this.seleccionAccion = null;
     this.mostrarAccion = false;
     this.tipoAccion = null;
-    // Mensajes
     this.error = '';
     this.success = '';
   }

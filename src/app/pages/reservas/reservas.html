@@ -60,7 +60,7 @@
           <td *ngIf="rol !== 'Usuario'">{{ r.usuario || '—' }}</td>
           <td *ngIf="rol !== 'Usuario'">{{ r.notificado ? 'Sí' : 'No' }}</td>
           <td *ngIf="rol !== 'Usuario'">{{ r.notificadoPor || '-' }}</td>
-          <td *ngIf="rol !== 'Usuario'">{{ r.penalidades || '—' }}</td>
+        <td *ngIf="rol !== 'Usuario'">{{ r.penalidades ? 'Sí' : 'No' }}</td>
           <td>
             <span class="badge"
                   [class.is-cumplida]="(r.estado | lowercase) === 'cumplida'"
