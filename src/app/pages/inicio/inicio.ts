@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
+import { EstadisticasGenerales, InicioService } from './data/inicio-service';
 
 type CategoriaCard = { key: string; label: string; img: string; link?: string; srcset?: string;sizes?: string; };
 
@@ -16,6 +17,9 @@ type CategoriaCard = { key: string; label: string; img: string; link?: string; s
 export class Inicio {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private estadisticasService = inject(InicioService);
+
+   estadisticas?: EstadisticasGenerales;
 
   @ViewChild('scroller') scroller!: ElementRef<HTMLDivElement>;
 
@@ -54,6 +58,17 @@ export class Inicio {
  { key: 'Folleto',label: 'Folleto',    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUZw0OBda_KpF2Shj8DNhhHEV-UYUlA-dN0g&s',link: '/catalogo?tipo=Folleto' },
 
   ];
+
+  constructor() {  
+    this.estadisticasService.getEstadisticasGenerales().subscribe({
+      next: (data) => {
+        this.estadisticas = data;
+      },
+      error: (err) => {
+        console.error('Error cargando estadísticas', err);
+      }
+    });
+  }
 
   scroll(dir: 'left' | 'right') {
     const el = this.scroller?.nativeElement;
